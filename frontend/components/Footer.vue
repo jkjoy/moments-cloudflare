@@ -3,24 +3,16 @@
     <div class="flex flex-col gap-1 items-center">
       <NuxtLink
         v-if="!starsLoadFailed"
-        to="https://github.com/kingwrcy/moments"
+        to="https://github.com/jkjoy/moments-cloudflare"
         target="_blank"
       >
         <img
-          src="https://img.shields.io/github/stars/kingwrcy/moments"
+          src="https://img.shields.io/github/stars/jkjoy/moments-cloudflare"
           class="h-6 inline-block mr-1"
           alt="github"
           @error="onStarsLoadFailed"
         />
       </NuxtLink>
-      <a
-        v-if="sysConfig.beiAnNo"
-        class="my-2 text-gray-500"
-        href="https://beian.miit.gov.cn/"
-        target="_blank"
-      >
-        {{ sysConfig.beiAnNo }}
-      </a>
     </div>
   </div>
 </template>

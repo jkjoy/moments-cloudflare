@@ -82,13 +82,13 @@ CREATE INDEX IF NOT EXISTS idx_comment_createdAt ON Comment(createdAt);
 CREATE INDEX IF NOT EXISTS idx_sysconfig_name ON SysConfig(name);
 
 -- 插入默认管理员用户 (用户名: admin, 密码: admin123)
--- bcrypt hash for 'admin123': $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
+-- bcrypt hash for 'admin123': $2a$10$6ep6URHMaj5tnrfa0/Cccu0U5/7BStrpLDUp2.oFJ9ujyrL3P5vlO
 INSERT OR IGNORE INTO User (id, username, nickname, password, avatarUrl, slogan, coverUrl)
 VALUES (
     1,
     'admin',
     '管理员',
-    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    '$2a$10$6ep6URHMaj5tnrfa0/Cccu0U5/7BStrpLDUp2.oFJ9ujyrL3P5vlO',
     '/avatar.webp',
     '系统管理员',
     '/cover.webp'
