@@ -55,6 +55,9 @@ const doReg = async () => {
     await useMyFetch('/user/reg', state)
     toast.success("注册成功,快去登录吧!")
     success = true
+  } catch (error) {
+    console.error('注册失败:', error)
+    toast.error(error instanceof Error ? error.message : '注册失败，请重试')
   } finally {
     pending.value = false
   }
