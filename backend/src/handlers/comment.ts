@@ -54,21 +54,33 @@ export async function addComment(request: Request, env: Env, ctx?: AppContext): 
           'SELECT * FROM User WHERE id = ?'
         ).bind(memo.userId).first<User>();
 
+        console.log('[Email Debug] Checking email conditions:', {
+          hasMemoAuthorEmail: !!memoAuthor?.email,
+          memoAuthorId: memoAuthor?.id,
+          commentAuthor: author,
+          isNotSelfComment: memoAuthor?.id !== author,
+          memoAuthorEmail: memoAuthor?.email
+        });
+
         // Only send notification if:
         // 1. Memo author has an email
         // 2. Comment author is not the memo author
         if (memoAuthor?.email && memoAuthor.id !== author) {
-          sendCommentNotification(env, {
+          console.log('[Email] Sending notification to:', memoAuthor.email);
+          const result = await sendCommentNotification(env, {
             memoId: body.memoId,
             memoContent: memo.content || '',
             memoAuthorEmail: memoAuthor.email,
             commentAuthor: username || '匿名用户',
             commentContent: body.content,
             replyTo: body.replyTo || undefined,
-          }).catch(err => {
-            console.error('Failed to send email notification:', err);
           });
+          console.log('[Email] Send result:', result);
+        } else {
+          console.log('[Email] Skipped: conditions not met');
         }
+      } else {
+        console.log('[Email] Skipped: memo not found');
       }
     } catch (emailError) {
       // Don't fail the request if email fails
