@@ -1,0 +1,179 @@
+.markdown-content {
+  line-height: 1.5rem;
+
+  a {
+    color: rgb(132 204 22);
+    margin: 0 2px;
+    &:hover {
+      color: rgb(101 163 13);
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+    margin-left: 1rem;
+    padding-left: 1rem;
+  }
+
+  ol {
+    list-style-type: decimal;
+    margin-left: 1rem;
+    padding-left: 1rem;
+  }
+
+  pre code {
+    word-break: break-all;
+  }
+
+  code {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
+  pre.shiki {
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.2rem;
+    position: relative;
+
+    &:hover {
+      .copyBtn {
+        display: block;
+      }
+    }
+    .copyBtn {
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      background-color: #fff;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      color: rgb(71 85 105);
+      display: none;
+    }
+    code {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+  }
+
+  p > code {
+    background-color: rgb(248 250 252);
+    color: rgb(71 85 105);
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    border-radius: 0.4rem;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
+  p {
+    margin-bottom: 0.1rem;
+  }
+  pre p,
+  ul p,
+  ol p {
+    text-indent: 0 !important;
+    margin-bottom: inherit;
+  }
+
+  h1 {
+    font-size: 16px;
+  }
+  h2 {
+    font-size: 15px;
+  }
+  h3 {
+    font-size: 14px;
+  }
+  h4 {
+    font-size: 13px;
+  }
+  h5 {
+    font-size: 12px;
+  }
+  h6 {
+    font-size: 11px;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+    line-height: 1;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow-x: auto;
+    display: block;
+  }
+  th,
+  td {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+  }
+  th {
+    background-color: rgba(0, 0, 0, 0.03);
+    font-weight: 600;
+
+    .dark & {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  blockquote {
+    border-left: 4px solid #42b883;
+    background: #f8f8f8;
+    padding: 0.4rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+    box-shadow: none;
+  }
+  blockquote p {
+    margin: 0.2rem 0;
+    line-height: 1.7;
+  }
+
+  hr {
+    border: 0;
+    height: 2px;
+    margin: 0.7rem 0;
+    background: linear-gradient(to right, transparent, #42b883, transparent);
+    position: relative;
+    overflow: visible;
+  }
+  hr::after {
+    content: "";
+    position: absolute;
+    left: -100%;
+    top: -2px;
+    width: 50%;
+    height: 4px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    );
+    animation: hr-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes hr-glow {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 150%;
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "moments-backend",
+  "version": "1.0.0",
+  "description": "Moments backend with Cloudflare Workers",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create moments-db",
+    "db:init": "wrangler d1 execute moments-db --local --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute moments-db --remote --file=./schema.sql"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "hono": "^4.0.0",
+    "resend": "^6.5.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240620.0",
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.4.5",
+    "wrangler": "^3.60.0"
+  }
+}
