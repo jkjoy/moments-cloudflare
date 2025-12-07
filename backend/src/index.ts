@@ -113,6 +113,10 @@ app.post('/api/memo/removeImage', async (c) => {
   return memoHandler.removeImage(c.req.raw, c.env, ctx);
 });
 
+app.post('/api/memo/getFaviconAndTitle', async (c) => {
+  return memoHandler.getFaviconAndTitle(c.req.raw, c.env);
+});
+
 app.post('/api/memo/getDoubanBookInfo', async (c) => {
   const id = c.req.query('id') || '';
   return doubanHandler.getDoubanBookInfo(c.req.raw, c.env, id);

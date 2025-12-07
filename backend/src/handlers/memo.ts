@@ -368,3 +368,75 @@ export async function removeImage(request: Request, env: Env, ctx: AppContext): 
     return failResp(ErrorCodes.FAIL);
   }
 }
+
+export async function getFaviconAndTitle(request: Request, env: Env): Promise<Response> {
+  try {
+    const url = new URL(request.url);
+    const targetUrl = url.searchParams.get('url');
+
+    if (!targetUrl) {
+      return failResp(ErrorCodes.PARAM_ERROR, 'Missing URL parameter');
+    }
+
+    // Fetch the target URL
+    const response = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    if (!response.ok) {
+      return failResp(ErrorCodes.FAIL, 'Failed to fetch URL');
+    }
+
+    const html = await response.text();
+
+    // Extract title
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const title = titleMatch ? titleMatch[1].trim() : new URL(targetUrl).hostname;
+
+    // Extract favicon
+    let favicon = '';
+
+    // Try to find favicon in various meta tags
+    const faviconPatterns = [
+      /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i,
+      /<link[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:icon|shortcut icon)["']/i,
+      /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
+    ];
+
+    for (const pattern of faviconPatterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        favicon = match[1];
+        break;
+      }
+    }
+
+    // If no favicon found, use default
+    if (!favicon) {
+      const urlObj = new URL(targetUrl);
+      favicon = `${urlObj.protocol}//${urlObj.host}/favicon.ico`;
+    } else if (favicon.startsWith('//')) {
+      // Protocol-relative URL
+      favicon = `https:${favicon}`;
+    } else if (favicon.startsWith('/')) {
+      // Relative URL
+      const urlObj = new URL(targetUrl);
+      favicon = `${urlObj.protocol}//${urlObj.host}${favicon}`;
+    } else if (!favicon.startsWith('http')) {
+      // Relative path without leading slash
+      const urlObj = new URL(targetUrl);
+      const basePath = urlObj.pathname.substring(0, urlObj.pathname.lastIndexOf('/') + 1);
+      favicon = `${urlObj.protocol}//${urlObj.host}${basePath}${favicon}`;
+    }
+
+    return successResp({
+      title,
+      favicon,
+    });
+  } catch (error) {
+    console.error('Get favicon and title error:', error);
+    return failResp(ErrorCodes.FAIL, 'Failed to parse URL');
+  }
+}
