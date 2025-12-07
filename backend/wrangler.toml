@@ -5,7 +5,7 @@ compatibility_date = "2024-01-01"
 # D1 数据库绑定
 [[d1_databases]]
 binding = "DB"
-database_name = "moments-db-local"
+database_name = "moments-db"
 database_id = "ba7cf4f1-1953-48a9-88bd-94a5794f0285"
 
 # R2 存储绑定
