@@ -35,25 +35,38 @@ onMounted(async () => {
 })
 
 const reload = async () => {
-  state.page = 1
-  const res = await useMyFetch<{
-    list: Array<MemoVO>,
-    total: number,
-    hasNext: boolean
-  }>('/memo/list', state)
-  memos.value = res.list
-  hasNext.value = res.hasNext
+  try {
+    state.page = 1
+    const res = await useMyFetch<{
+      list: Array<MemoVO>,
+      total: number,
+      hasNext: boolean
+    }>('/memo/list', state)
+    memos.value = res.list
+    hasNext.value = res.hasNext
+  } catch (error) {
+    console.error('加载memo列表失败:', error)
+    // 即使失败也保持页面可用，显示空列表
+    memos.value = []
+    hasNext.value = false
+  }
 }
 
 const loadMore = async () => {
-  state.page = state.page + 1
-  const res = await useMyFetch<{
-    list: Array<MemoVO>,
-    total: number,
-    hasNext: boolean
-  }>('/memo/list', state)
-  memos.value = [...memos.value, ...res.list]
-  hasNext.value = res.hasNext
+  try {
+    state.page = state.page + 1
+    const res = await useMyFetch<{
+      list: Array<MemoVO>,
+      total: number,
+      hasNext: boolean
+    }>('/memo/list', state)
+    memos.value = [...memos.value, ...res.list]
+    hasNext.value = res.hasNext
+  } catch (error) {
+    console.error('加载更多memo失败:', error)
+    // 恢复页码
+    state.page = state.page - 1
+  }
 }
 
 memoReloadEvent.on(async () => {
