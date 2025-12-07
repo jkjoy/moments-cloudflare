@@ -186,7 +186,7 @@ app.post('/api/tag/list', async (c) => {
 
 // Health check
 app.get('/', (c) => {
-  return c.json({ message: 'Moments API is running', version: '1.0.0' });
+  return c.json({ message: 'Moments API is running', version: '1.0.2' });
 });
 
 export default app;
