@@ -5,10 +5,7 @@ export default defineNuxtConfig({
     modules: ["@nuxt/ui", '@nuxt/icon', '@nuxtjs/color-mode', '@vueuse/nuxt', 'dayjs-nuxt'],
     ssr: false,
     nitro: {
-        preset: 'cloudflare-pages',
-        output: {
-            publicDir: '.output/public'
-        }
+        preset: 'static',
     },
     runtimeConfig: {
         public: {
