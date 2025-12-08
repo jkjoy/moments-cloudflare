@@ -126,7 +126,7 @@
         </div>
 
         <div class="flex justify-between items-center relative">
-          <div class="flex text-xs text-[#9DA4B0]">
+          <div class="flex text-xs text-[#9DA4B0]"  @click="navigateTo(`/memo/${item.id}`)" >
             {{
               sysConfig.timeFormat === "timeAgo"
                 ? $dayjs(item.createdAt).fromNow()
@@ -170,16 +170,6 @@
                 >
                   <UIcon name="i-octicon-comment" />
                   <div>评论</div>
-                </div>
-              </template>
-              <template v-if="$route.path !== `/memo/${item.id}`">
-                <span class="bg-[#6b7280] h-[20px] w-[1px]"></span>
-                <div
-                  class="flex flex-row gap-1 cursor-pointer items-center px-4"
-                  @click="navigateTo(`/memo/${item.id}`)"
-                >
-                  <UIcon name="i-carbon-view" />
-                  <div>详情</div>
                 </div>
               </template>
             </div>
@@ -395,11 +385,11 @@ const setPinned = async (id: number) => {
   moreToolbar.value = false;
 };
 
-const doLike = async (id: number, token: string = "") => {
+const doLike = async (id: number) => {
   const likes = JSON.parse(
     localStorage.getItem("likeMemos") || "[]"
   ) as Array<number>;
-  await useMyFetch(`/memo/like?id=${id}&token=${token}`);
+  await useMyFetch(`/memo/like?id=${id}`);
   toast.success("点赞成功!");
   likes.push(id);
   localStorage.setItem("likeMemos", JSON.stringify(likes));
@@ -417,17 +407,7 @@ const likeMemo = async (id: number) => {
     return;
   }
 
-  if (sysConfig.value.enableGoogleRecaptcha) {
-    grecaptcha.ready(() => {
-      grecaptcha
-        .execute(sysConfig.value.googleSiteKey, { action: "newComment" })
-        .then(async (token) => {
-          await doLike(id, token);
-        });
-    });
-  } else {
-    await doLike(id);
-  }
+  await doLike(id);
 };
 
 onMounted(() => {

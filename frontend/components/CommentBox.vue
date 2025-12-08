@@ -58,18 +58,10 @@ const state = reactive({
 
 
 const comment = async () => {
-  if (sysConfig.value.enableGoogleRecaptcha) {
-    grecaptcha.ready(() => {
-      grecaptcha.execute(sysConfig.value.googleSiteKey, {action: 'newComment'}).then(async (token) => {
-        await doComment(token)
-      })
-    })
-  } else {
-    await doComment()
-  }
+  await doComment()
 }
 
-const doComment = async (token?: string) => {
+const doComment = async () => {
   if (!global.value.userinfo.token) {
     localCommentUserinfo.value = {
       username: state.username,
@@ -81,7 +73,7 @@ const doComment = async (token?: string) => {
     toast.error("评论字数超过限制长度:" + sysConfig.value.maxCommentLength)
     return
   }
-  await useMyFetch(`/comment/add`, {...state, token:token})
+  await useMyFetch(`/comment/add`, state)
   toast.success("评论成功!")
   currentCommentBox.value = ''
   state.content = ''  // 只清空评论内容，保留用户信息方便下次使用
