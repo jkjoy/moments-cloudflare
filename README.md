@@ -174,6 +174,35 @@ wrangler pages deploy .output/public --project-name=moments-frontend
    - 构建输出目录: `frontend/.output/public`
    - 环境变量: `NUXT_PUBLIC_API_BASE=你的后端地址`
 
+### GitHub Actions 自动部署
+
+仓库已内置两条工作流：
+
+- [deploy-backend.yml](./.github/workflows/deploy-backend.yml)
+  - `main` 分支有 `backend/**` 变更时触发
+  - 也支持手动 `workflow_dispatch`
+- [deploy-frontend.yml](./.github/workflows/deploy-frontend.yml)
+  - `main` 分支有 `frontend/**` 变更时触发
+  - 也支持手动 `workflow_dispatch`
+
+在 GitHub 仓库 Settings -> Secrets and variables -> Actions 中配置：
+
+Secrets:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Variables:
+
+- `NUXT_PUBLIC_API_BASE`
+- `CLOUDFLARE_PAGES_PROJECT_NAME`
+
+说明：
+
+- 后端工作流会在 `backend/` 下执行 `npm ci`、`npx tsc --noEmit`、`npx wrangler deploy`
+- 前端工作流会在 `frontend/` 下执行 `npm ci`、`npx nuxi typecheck`、`npm run build`、`npx wrangler pages deploy .output/public`
+- Worker 的运行时 Secret，比如 `TURNSTILE_SECRET_KEY`，仍然需要你提前在 Cloudflare 中用 `wrangler secret put` 或 Dashboard 配置一次，GitHub Actions 不会自动同步这些 Worker Secret
+
 ## 使用指南
 
 ### 默认管理员账号
