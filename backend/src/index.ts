@@ -172,11 +172,13 @@ app.post('/api/sysConfig/get', async (c) => {
 });
 
 app.post('/api/sysConfig/getFull', async (c) => {
-  return sysConfigHandler.getFullSysConfig(c.req.raw, c.env);
+  const ctx: AppContext = { user: c.get('user') };
+  return sysConfigHandler.getFullSysConfig(c.req.raw, c.env, ctx);
 });
 
 app.post('/api/sysConfig/save', async (c) => {
-  return sysConfigHandler.saveSysConfig(c.req.raw, c.env);
+  const ctx: AppContext = { user: c.get('user') };
+  return sysConfigHandler.saveSysConfig(c.req.raw, c.env, ctx);
 });
 
 // Tag routes

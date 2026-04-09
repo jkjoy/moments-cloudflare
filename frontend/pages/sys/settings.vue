@@ -83,6 +83,10 @@ import type {SysConfigVO, UserVO} from "~/types";
 import {toast} from "vue-sonner";
 import {useUpload} from "~/utils";
 
+definePageMeta({
+  middleware: "admin-only",
+})
+
 const normalizeFavicon = (favicon?: string) => {
   if (!favicon || favicon === "/favicon.ico") {
     return "/favicon.png";

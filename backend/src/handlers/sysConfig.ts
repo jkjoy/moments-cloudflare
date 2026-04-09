@@ -1,5 +1,18 @@
-import { Env } from '../types';
+import { AppContext, Env, ErrorCodes } from '../types';
+import { failResp } from '../utils/response';
 import { getConfigValue, setConfigValue } from '../utils/sysConfig';
+
+function requireAdmin(ctx: AppContext): Response | null {
+  if (!ctx.user) {
+    return failResp(ErrorCodes.TOKEN_MISSING);
+  }
+
+  if (ctx.user.id !== 1) {
+    return failResp(ErrorCodes.FAIL, '没有权限');
+  }
+
+  return null;
+}
 
 export async function getSysConfig(request: Request, env: Env) {
   // Return public system configuration
@@ -39,7 +52,12 @@ export async function getSysConfig(request: Request, env: Env) {
   });
 }
 
-export async function getFullSysConfig(request: Request, env: Env) {
+export async function getFullSysConfig(request: Request, env: Env, ctx: AppContext) {
+  const unauthorized = requireAdmin(ctx);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   // Return full system configuration including sensitive data
   const config = {
     version: '1.0.0',
@@ -69,7 +87,12 @@ export async function getFullSysConfig(request: Request, env: Env) {
   });
 }
 
-export async function saveSysConfig(request: Request, env: Env) {
+export async function saveSysConfig(request: Request, env: Env, ctx: AppContext) {
+  const unauthorized = requireAdmin(ctx);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   try {
     const body = await request.json() as Record<string, unknown>;
 
