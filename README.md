@@ -339,14 +339,7 @@ Cloudflare 提供慷慨的免费额度：
 1. 确认 R2 bucket 已创建
 2. 检查 `wrangler.toml` 中的 R2 绑定配置
 
-### CORS 错误
-
-在后端 `wrangler.toml` 中设置正确的 `CORS_ORIGIN`：
-
-```toml
-[vars]
-CORS_ORIGIN = "https://your-frontend.pages.dev"
-```
+ 
 
 ### 前端 API 请求失败
 

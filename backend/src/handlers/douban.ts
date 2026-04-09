@@ -27,6 +27,43 @@ interface DoubanMovieInfo {
   runtime: string;
 }
 
+async function cacheDoubanCoverToR2(env: Env, sourceUrl: string, key: string): Promise<string> {
+  try {
+    const existing = await env.BUCKET.head(key);
+    if (existing) {
+      return `/r2/${key}`;
+    }
+
+    const response = await fetch(sourceUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
+    });
+
+    if (!response.ok || !response.body) {
+      return sourceUrl;
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const body = await response.arrayBuffer();
+
+    await env.BUCKET.put(key, body, {
+      httpMetadata: {
+        contentType,
+      },
+      customMetadata: {
+        sourceUrl,
+        cachedAt: new Date().toISOString(),
+      },
+    });
+
+    return `/r2/${key}`;
+  } catch (error) {
+    console.error('Cache Douban cover to R2 error:', error);
+    return sourceUrl;
+  }
+}
+
 export async function getDoubanBookInfo(request: Request, env: Env, id: string): Promise<Response> {
   try {
     if (!id) {
@@ -48,8 +85,9 @@ export async function getDoubanBookInfo(request: Request, env: Env, id: string):
 
     const html = await response.text();
 
-    // Use proxy service to bypass anti-hotlinking
-    const image = `https://dou.img.lithub.cc/book/${id}.jpg`;
+    // Fetch via image proxy first, then cache into R2 to avoid future external hotlink failures.
+    const imageSourceUrl = `https://dou.img.lithub.cc/book/${id}.jpg`;
+    const image = await cacheDoubanCoverToR2(env, imageSourceUrl, `douban/book/${id}`);
 
     const bookInfo: DoubanBookInfo = {
       id,
@@ -97,8 +135,9 @@ export async function getDoubanMovieInfo(request: Request, env: Env, id: string)
 
     const html = await response.text();
 
-    // Use proxy service to bypass anti-hotlinking
-    const image = `https://dou.img.lithub.cc/movie/${id}.jpg`;
+    // Fetch via image proxy first, then cache into R2 to avoid future external hotlink failures.
+    const imageSourceUrl = `https://dou.img.lithub.cc/movie/${id}.jpg`;
+    const image = await cacheDoubanCoverToR2(env, imageSourceUrl, `douban/movie/${id}`);
 
     const movieInfo: DoubanMovieInfo = {
       id,
