@@ -10,6 +10,10 @@
 import type {UserVO} from "~/types";
 import MemoEdit from "~/components/MemoEdit.vue";
 
+definePageMeta({
+  middleware: "auth-only",
+})
+
 const currentUser = useState<UserVO>('userinfo')
 
 </script>

@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import type {DoubanBook, DoubanMovie} from "~/types";
+import { toast } from "vue-sonner";
 
 const pending = ref(false)
 const doParse = async (close: Function) => {
@@ -34,6 +35,8 @@ const doParse = async (close: Function) => {
     const res = await useMyFetch(`${url}?id=${data.value.id}`)
     Object.assign(data.value, res)
     close()
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : '获取豆瓣信息失败')
   } finally {
     pending.value = false
   }
