@@ -51,7 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { useSortable } from "@vueuse/integrations/useSortable";
 import type { SysConfigVO } from "~/types";
 
 interface ImgConfig {
@@ -84,7 +83,9 @@ const removeImage = async (img: string) => {
 onMounted(() => {
   if (route.path.startsWith("/new") || route.path.startsWith("/edit")) {
     setTimeout(() => {
-      useSortable(el, images);
+      void import("@vueuse/integrations/useSortable").then(({ useSortable }) => {
+        useSortable(el, images);
+      });
     }, 500);
   }
 });

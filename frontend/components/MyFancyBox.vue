@@ -1,34 +1,60 @@
-<script setup>
-import { Fancybox } from '@fancyapps/ui/dist/index.esm.js';
+<script setup lang="ts">
+type FancyboxApi = typeof import('@fancyapps/ui/dist/index.esm.js').Fancybox;
 
 const props = defineProps({
   options: Object,
 });
-const container = ref(null);
+const container = ref<HTMLElement | null>(null);
+let fancyboxApi: FancyboxApi | null = null;
+let fancyboxPromise: Promise<FancyboxApi> | null = null;
 
 const randomId = randomHexStr();
-onMounted(() => {
-  Array.from(container.value.children).map((el) => {
-    el.setAttribute('data-fancybox', `gallery-${randomId}`);
+
+const getFancybox = async () => {
+  if (fancyboxApi) {
+    return fancyboxApi;
+  }
+
+  if (!fancyboxPromise) {
+    fancyboxPromise = import('@fancyapps/ui/dist/index.esm.js').then((module) => {
+      fancyboxApi = module.Fancybox;
+      return module.Fancybox;
+    });
+  }
+
+  return fancyboxPromise;
+};
+
+const bindFancybox = async () => {
+  await nextTick();
+  if (!container.value) {
+    return;
+  }
+
+  const fancybox = await getFancybox();
+
+  Array.from(container.value.children).forEach((el) => {
+    if (el instanceof HTMLElement) {
+      el.setAttribute('data-fancybox', `gallery-${randomId}`);
+    }
   });
-  Fancybox.bind(`[data-fancybox="gallery-${randomId}"]`, {
+
+  fancybox.unbind(container.value);
+  fancybox.close();
+  fancybox.bind(`[data-fancybox="gallery-${randomId}"]`, {
     Thumbs: {
       type: 'modern',
     },
     ...(props.options || {}),
   });
+};
+
+onMounted(() => {
+  void bindFancybox();
 });
 
-nextTick(() => {
-  Fancybox.unbind(container.value);
-  Fancybox.close();
-
-  Fancybox.bind(`[data-fancybox="gallery-${randomId}"]`, {
-    Thumbs: {
-      type: 'modern',
-    },
-    ...(props.options || {}),
-  });
+onUpdated(() => {
+  void bindFancybox();
 });
 
 function randomHexStr(len = 16, chars = '0123456789abcdefghijklmnopqrstuvwxyz') {
@@ -42,7 +68,12 @@ function randomHexStr(len = 16, chars = '0123456789abcdefghijklmnopqrstuvwxyz') 
 }
 
 onUnmounted(() => {
-  Fancybox.destroy();
+  if (!fancyboxApi || !container.value) {
+    return;
+  }
+
+  fancyboxApi.unbind(container.value);
+  fancyboxApi.close();
 });
 </script>
 

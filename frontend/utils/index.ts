@@ -1,9 +1,6 @@
 import type { ResultVO, SysConfigVO } from "~/types";
 import { toast } from "vue-sonner";
 import { useGlobalState } from "~/composables/useGlobalState";
-import markdownit from "markdown-it";
-import { fromHighlighter } from "@shikijs/markdown-it/core";
-import { createHighlighterCore } from "shiki/core";
 
 const global = useGlobalState();
 
@@ -137,39 +134,3 @@ export const useUpload = async (
 
   return uploadFile2R2(files, onProgress);
 };
-
-export const md = markdownit({
-  html: true,
-  linkify: true,
-  typographer: true,
-  breaks: true,
-});
-
-createHighlighterCore({
-  themes: [import("shiki/themes/github-dark.mjs")],
-  langs: [
-    import("shiki/langs/c.mjs"),
-    import("shiki/langs/css.mjs"),
-    import("shiki/langs/html.mjs"),
-    import("shiki/langs/javascript.mjs"),
-    import("shiki/langs/json.mjs"),
-    import("shiki/langs/python.mjs"),
-    import("shiki/langs/shellscript.mjs"),
-    import("shiki/langs/sql.mjs"),
-    import("shiki/langs/tsx.mjs"),
-    import("shiki/langs/xml.mjs"),
-    import("shiki/langs/yaml.mjs"),
-    import("shiki/langs/go.mjs"),
-  ],
-  loadWasm: import("shiki/wasm"),
-}).then((highlighter) => {
-  md.use(
-    //@ts-ignore
-    fromHighlighter(highlighter, {
-      themes: {
-        light: "github-dark",
-        dark: "github-dark",
-      },
-    })
-  );
-});

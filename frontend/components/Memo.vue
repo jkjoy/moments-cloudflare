@@ -292,7 +292,7 @@ import { toast } from "vue-sonner";
 import { memoChangedEvent, memoReloadEvent } from "~/event";
 import Comment from "~/components/Comment.vue";
 import { useGlobalState } from "~/store";
-import { md } from "~/utils";
+import { ensureMarkdownHighlighter, renderMarkdown } from "~/utils/markdown";
 
 const showMore = ref(false);
 const showMoreClicked = ref(false);
@@ -331,6 +331,7 @@ const moreToolbar = ref(false);
 const showToolbar = ref(false);
 const toolbarRef = ref(null);
 const liked = ref(false);
+const markdownVersion = ref(0);
 onClickOutside(toolbarRef, () => (showToolbar.value = false));
 
 const location = computed(() => {
@@ -428,10 +429,24 @@ onMounted(() => {
   }
 });
 
+watch(
+  () => item.value.content,
+  async (content) => {
+    if (!content) {
+      return;
+    }
+
+    await ensureMarkdownHighlighter(content);
+    markdownVersion.value += 1;
+  },
+  { immediate: true }
+);
+
 const content = computed(() => {
+  markdownVersion.value;
   if (item.value.content && item.value.content.length > 0) {
     try {
-      return md.render(item.value.content);
+      return renderMarkdown(item.value.content);
     } catch (e) {
       console.log("内容渲染错误,请重新编辑", e);
       return "内容渲染错误,请重新编辑";
