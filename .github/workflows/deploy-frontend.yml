@@ -19,9 +19,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Checkout
@@ -35,16 +32,19 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
+        working-directory: frontend
         run: npm ci
 
       - name: Type check
+        working-directory: frontend
         run: npx nuxi typecheck
 
       - name: Build
+        working-directory: frontend
         run: npm run build
 
       - name: Deploy Pages
-        run: npx wrangler pages deploy
+        run: npx wrangler pages deploy frontend/.output/public --project-name moments-cloudflare
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

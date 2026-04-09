@@ -129,12 +129,13 @@ pnpm run deploy
 
 - 浏览器始终请求当前站点下的 `/api/*`、`/r2/*`
 - Pages Functions 再把这些请求通过 `BACKEND` 绑定转发给 `moments-backend`
-- 配置文件在 [frontend/wrangler.toml](./frontend/wrangler.toml)
+- Pages 配置文件在仓库根目录的 [wrangler.toml](./wrangler.toml)
+- Pages Functions 代理文件在 [functions/api/[[path]].ts](./functions/api/[[path]].ts) 和 [functions/r2/[[path]].ts](./functions/r2/[[path]].ts)
 
 根据 Cloudflare Pages 官方文档：
 
 - Service bindings 可以让 Pages Functions 直接调用 Worker
-- 一旦使用 Wrangler 配置文件并带上 `pages_build_output_dir`，这个文件就会成为 Pages 项目的 source of truth
+- 一旦使用仓库根目录的 Wrangler 配置文件并带上 `pages_build_output_dir`，这个文件就会成为 Pages 项目的 source of truth
 
 #### 2. 安装依赖
 
@@ -164,7 +165,8 @@ pnpm run dev
 
 ```bash
 pnpm run build
-wrangler pages deploy
+cd ..
+wrangler pages deploy frontend/.output/public --project-name moments-cloudflare
 ```
 
 **方式二：使用 Git 集成**
@@ -200,9 +202,9 @@ Variables:
 说明：
 
 - 后端工作流会在 `backend/` 下执行 `npm ci`、`npx tsc --noEmit`、`npx wrangler deploy`
-- 前端工作流会在 `frontend/` 下执行 `npm ci`、`npx nuxi typecheck`、`npm run build`、`npx wrangler pages deploy`
+- 前端工作流会在 `frontend/` 下执行 `npm ci`、`npx nuxi typecheck`、`npm run build`，然后在仓库根目录执行 `npx wrangler pages deploy frontend/.output/public --project-name moments-cloudflare`
 - Worker 的运行时 Secret，比如 `TURNSTILE_SECRET_KEY`，仍然需要你提前在 Cloudflare 中用 `wrangler secret put` 或 Dashboard 配置一次，GitHub Actions 不会自动同步这些 Worker Secret
-- Pages 项目的 Service Binding 在 [frontend/wrangler.toml](./frontend/wrangler.toml) 中声明，绑定名为 `BACKEND`，指向 `moments-backend`
+- Pages 项目的 Service Binding 在 [wrangler.toml](./wrangler.toml) 中声明，绑定名为 `BACKEND`，指向 `moments-backend`
 
 ## 使用指南
 
@@ -350,8 +352,9 @@ CORS_ORIGIN = "https://your-frontend.pages.dev"
 
 检查 Pages 项目的 Service Binding 配置是否正确：
 
-- [frontend/wrangler.toml](./frontend/wrangler.toml)
-- [frontend/functions/[[path]].ts](./frontend/functions/[[path]].ts)
+- [wrangler.toml](./wrangler.toml)
+- [functions/api/[[path]].ts](./functions/api/[[path]].ts)
+- [functions/r2/[[path]].ts](./functions/r2/[[path]].ts)
 
 ### 开启 Turnstile 后评论失败
 
