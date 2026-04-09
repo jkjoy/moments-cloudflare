@@ -123,14 +123,18 @@ pnpm run deploy
 
 ### 前端部署
 
-#### 1. 配置 API 地址
+#### 1. 前后端绑定
 
-创建 `.env` 文件：
+前端不再通过域名访问后端，而是通过 Cloudflare Pages Functions 的 Service Binding 直接调用 Worker：
 
-```bash
-cd frontend
-echo "NUXT_PUBLIC_API_BASE=https://moments-backend.your-subdomain.workers.dev" > .env
-```
+- 浏览器始终请求当前站点下的 `/api/*`、`/r2/*`
+- Pages Functions 再把这些请求通过 `BACKEND` 绑定转发给 `moments-backend`
+- 配置文件在 [frontend/wrangler.toml](./frontend/wrangler.toml)
+
+根据 Cloudflare Pages 官方文档：
+
+- Service bindings 可以让 Pages Functions 直接调用 Worker
+- 一旦使用 Wrangler 配置文件并带上 `pages_build_output_dir`，这个文件就会成为 Pages 项目的 source of truth
 
 #### 2. 安装依赖
 
@@ -160,7 +164,7 @@ pnpm run dev
 
 ```bash
 pnpm run build
-wrangler pages deploy .output/public --project-name=moments-frontend
+wrangler pages deploy
 ```
 
 **方式二：使用 Git 集成**
@@ -172,7 +176,6 @@ wrangler pages deploy .output/public --project-name=moments-frontend
 5. 配置构建设置：
    - 构建命令: `cd frontend && pnpm install && pnpm run build`
    - 构建输出目录: `frontend/.output/public`
-   - 环境变量: `NUXT_PUBLIC_API_BASE=你的后端地址`
 
 ### GitHub Actions 自动部署
 
@@ -194,14 +197,12 @@ Secrets:
 
 Variables:
 
-- `NUXT_PUBLIC_API_BASE`
-- `CLOUDFLARE_PAGES_PROJECT_NAME`
-
 说明：
 
 - 后端工作流会在 `backend/` 下执行 `npm ci`、`npx tsc --noEmit`、`npx wrangler deploy`
-- 前端工作流会在 `frontend/` 下执行 `npm ci`、`npx nuxi typecheck`、`npm run build`、`npx wrangler pages deploy .output/public`
+- 前端工作流会在 `frontend/` 下执行 `npm ci`、`npx nuxi typecheck`、`npm run build`、`npx wrangler pages deploy`
 - Worker 的运行时 Secret，比如 `TURNSTILE_SECRET_KEY`，仍然需要你提前在 Cloudflare 中用 `wrangler secret put` 或 Dashboard 配置一次，GitHub Actions 不会自动同步这些 Worker Secret
+- Pages 项目的 Service Binding 在 [frontend/wrangler.toml](./frontend/wrangler.toml) 中声明，绑定名为 `BACKEND`，指向 `moments-backend`
 
 ## 使用指南
 
@@ -347,7 +348,10 @@ CORS_ORIGIN = "https://your-frontend.pages.dev"
 
 ### 前端 API 请求失败
 
-检查 `.env` 文件中的 `NUXT_PUBLIC_API_BASE` 是否指向正确的后端地址。
+检查 Pages 项目的 Service Binding 配置是否正确：
+
+- [frontend/wrangler.toml](./frontend/wrangler.toml)
+- [frontend/functions/[[path]].ts](./frontend/functions/[[path]].ts)
 
 ### 开启 Turnstile 后评论失败
 

@@ -1,4 +1,5 @@
 import type { ApiResponse } from '~/types';
+import { API_BASE } from '~/utils/api-base';
 
 export class ApiClient {
   private baseURL: string;
@@ -85,6 +86,5 @@ export class ApiClient {
 
 // Export as composable for auto-import in Nuxt 3
 export const useApi = () => {
-  const config = useRuntimeConfig();
-  return new ApiClient(config.public.apiBase);
+  return new ApiClient(API_BASE);
 };

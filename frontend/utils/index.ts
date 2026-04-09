@@ -1,11 +1,11 @@
 import type { ResultVO, SysConfigVO } from "~/types";
 import { toast } from "vue-sonner";
 import { useGlobalState } from "~/composables/useGlobalState";
+import { API_BASE } from "~/utils/api-base";
 
 const global = useGlobalState();
 
 export const useMyFetch = async <T>(url: string, data?: any) => {
-  const config = useRuntimeConfig();
   const headers: Record<string, string> = {};
 
   const userinfo = global.value.userinfo;
@@ -13,7 +13,7 @@ export const useMyFetch = async <T>(url: string, data?: any) => {
     headers["x-api-token"] = userinfo.token;
   }
 
-  const res = await $fetch<ResultVO<T>>(`${config.public.apiBase}/api${url}`, {
+  const res = await $fetch<ResultVO<T>>(`${API_BASE}/api${url}`, {
     method: "post",
     body: data ? JSON.stringify(data) : null,
     headers: headers,
@@ -87,14 +87,13 @@ const uploadFile2R2 = async (
   files: FileList,
   onProgress?: OnTotalProgressCallback
 ): Promise<string[]> => {
-  const config = useRuntimeConfig();
   const result: string[] = [];
 
   for (let i = 0; i < files.length; i++) {
     try {
       const file = files[i];
       const uploadResult = await uploadFile2R2WithProgress(
-        `${config.public.apiBase}/api/file/upload`,
+        `${API_BASE}/api/file/upload`,
         file,
         (progress) => {
           if (onProgress) {
@@ -110,7 +109,7 @@ const uploadFile2R2 = async (
 
       // 如果是相对路径，拼接上后端域名
         const fullUrl = uploadResult.url.startsWith('/')
-          ? `${config.public.apiBase}${uploadResult.url}`
+          ? `${API_BASE}${uploadResult.url}`
           : uploadResult.url;
 
         result.push(fullUrl);

@@ -2,7 +2,8 @@
 
 ## 基础信息
 
-- Base URL: `https://your-worker.workers.dev`
+- 站内访问 Base URL: 当前前端域名下的 `/api`
+- Pages Functions 会通过 Service Binding `BACKEND` 转发到后端 Worker `moments-backend`
 - Content-Type: `application/json`
 - 认证方式: Header `X-API-TOKEN`
 
@@ -349,7 +350,7 @@ Header: X-API-TOKEN (必需)
 
 ```typescript
 // 登录
-const response = await fetch('https://your-worker.workers.dev/api/user/login', {
+const response = await fetch('/api/user/login', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -367,7 +368,7 @@ if (result.code === 0) {
 }
 
 // 带认证的请求
-const response = await fetch('https://your-worker.workers.dev/api/memo/save', {
+const response = await fetch('/api/memo/save', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -385,17 +386,17 @@ const response = await fetch('https://your-worker.workers.dev/api/memo/save', {
 
 ```bash
 # 登录
-curl -X POST https://your-worker.workers.dev/api/user/login \
+curl -X POST https://your-frontend-domain/api/user/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"password123"}'
 
 # 获取动态列表
-curl -X POST https://your-worker.workers.dev/api/memo/list \
+curl -X POST https://your-frontend-domain/api/memo/list \
   -H "Content-Type: application/json" \
   -d '{"page":1,"size":10}'
 
 # 创建动态（需要 token）
-curl -X POST https://your-worker.workers.dev/api/memo/save \
+curl -X POST https://your-frontend-domain/api/memo/save \
   -H "Content-Type: application/json" \
   -H "X-API-TOKEN: your-token-here" \
   -d '{"content":"新动态","imgs":[],"showType":1}'

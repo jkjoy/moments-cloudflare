@@ -7,11 +7,6 @@ export default defineNuxtConfig({
     nitro: {
         preset: 'static',
     },
-    runtimeConfig: {
-        public: {
-            apiBase: ''
-        }
-    },
     dayjs: {
         locales: ['zh'],
         defaultLocale: 'zh'
