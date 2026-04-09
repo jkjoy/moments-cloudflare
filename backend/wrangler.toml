@@ -6,7 +6,7 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "moments-db"
-database_id = "ba7cf4f1-1953-48a9-88bd-94a5794f0285"
+database_id = "34d9f779-a4df-4e61-9598-8dd82375f578"
 
 # R2 存储绑定
 [[r2_buckets]]
@@ -14,6 +14,6 @@ binding = "BUCKET"
 bucket_name = "moments-storage"
 
 # 环境变量
-[vars]
-JWT_SECRET = "your-jwt-secret-change-in-production"
-CORS_ORIGIN = "*"
+#[vars]
+#JWT_SECRET = "your-jwt-secret-change-in-production"
+#CORS_ORIGIN = "*"
