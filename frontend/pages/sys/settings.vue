@@ -83,6 +83,14 @@ import type {SysConfigVO, UserVO} from "~/types";
 import {toast} from "vue-sonner";
 import {useUpload} from "~/utils";
 
+const normalizeFavicon = (favicon?: string) => {
+  if (!favicon || favicon === "/favicon.ico") {
+    return "/favicon.png";
+  }
+
+  return favicon;
+}
+
 const currentUser = useState<UserVO>('userinfo')
 const version = ref('')
 const commitId = ref('')
@@ -98,7 +106,7 @@ const state = reactive({
   timeFormat: 'timeAgo',
   adminUserName: "admin",
   title: "极简朋友圈",
-  favicon: "/favicon.ico",
+  favicon: "/favicon.png",
   css: "",
   js: "",
   enableEmail: false,
@@ -110,12 +118,14 @@ const reload = async () => {
   const res = await useMyFetch<SysConfigVO>('/sysConfig/getFull')
   if (res) {
     Object.assign(state, res)
+    state.favicon = normalizeFavicon(res.favicon)
     version.value = res.version
     commitId.value = res.commitId
   }
 }
 
 const save = async () => {
+  state.favicon = normalizeFavicon(state.favicon)
   await useMyFetch('/sysConfig/save', state)
   toast.success("保存成功")
   location.reload()

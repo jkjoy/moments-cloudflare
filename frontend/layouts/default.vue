@@ -65,6 +65,14 @@
 import type { SysConfigVO, UserVO } from "~/types";
 import { useGlobalState } from "~/store";
 
+const normalizeFavicon = (favicon?: string) => {
+  if (!favicon || favicon === "/favicon.ico") {
+    return "/favicon.png";
+  }
+
+  return favicon;
+};
+
 const global = useGlobalState();
 const open = useState<boolean>("sidebarOpen", () => false);
 const currentUser = useState<UserVO>("userinfo");
@@ -73,20 +81,24 @@ const currentProfile = await useMyFetch<UserVO>("/user/profile");
 const sysConfigVO = await useMyFetch<SysConfigVO>("/sysConfig/get");
 if (currentProfile) {
   currentUser.value = currentProfile;
-  sysConfig.value = sysConfigVO;
+  sysConfig.value = {
+    ...sysConfigVO,
+    favicon: normalizeFavicon(sysConfigVO.favicon),
+  };
 }
 const { y } = useWindowScroll();
+const resolvedFavicon = normalizeFavicon(sysConfigVO.favicon);
 useHead({
   title: sysConfigVO.title,
   link: [
     {
       rel: "shortcut icon",
       type: "image/png",
-      href: sysConfigVO.favicon || "/favicon.png",
+      href: resolvedFavicon,
     },
     {
       rel: "apple-touch-icon-precomposed",
-      href: sysConfigVO.favicon || "/favicon.png",
+      href: resolvedFavicon,
     },
     {
       rel: "alternate",

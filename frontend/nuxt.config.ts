@@ -126,32 +126,6 @@ export default defineNuxtConfig({
                         if (id.includes('/sortablejs/') || id.includes('/@vueuse/integrations/')) {
                             return 'editor-vendor';
                         }
-
-                        const modulePath = id.split('node_modules/')[1];
-                        if (!modulePath) {
-                            return;
-                        }
-
-                        const parts = modulePath.split('/');
-                        const packageName = parts[0].startsWith('@')
-                            ? `${parts[0]}-${parts[1]}`
-                            : parts[0];
-
-                        if ([
-                            '@vue-devtools-api',
-                            'cookie-es',
-                            'errx',
-                            'iron-webcrypto',
-                            'klona',
-                            'node-mock-http',
-                            'perfect-debounce',
-                            'uncrypto',
-                            'vue',
-                        ].includes(packageName)) {
-                            return;
-                        }
-
-                        return `vendor-${packageName.replace(/[@/]/g, '-')}`;
                     }
                 }
             }
