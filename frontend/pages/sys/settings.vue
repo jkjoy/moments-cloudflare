@@ -26,6 +26,20 @@
     <UFormGroup label="是否开启注册用户" name="enableRegister" :ui="{label:{base:'font-bold'}}">
       <UToggle v-model="state.enableRegister"/>
     </UFormGroup>
+    <UFormGroup label="是否启用 Turnstile 评论验证" name="enableTurnstile" :ui="{label:{base:'font-bold'}}">
+      <UToggle v-model="state.enableTurnstile"/>
+    </UFormGroup>
+    <UFormGroup
+      v-if="state.enableTurnstile"
+      label="Turnstile Site Key"
+      name="turnstileSiteKey"
+      :ui="{label:{base:'font-bold'}}"
+    >
+      <UInput v-model="state.turnstileSiteKey" placeholder="0x4AAAA..." autocomplete="off"/>
+      <div class="text-xs text-gray-400 mt-1">
+        Secret Key 只配置在 Worker 环境变量 `TURNSTILE_SECRET_KEY`，不要填在这里。
+      </div>
+    </UFormGroup>
     <UFormGroup label="自定义CSS" name="css" :ui="{label:{base:'font-bold'}}">
       <UTextarea v-model="state.css" :rows="5"/>
     </UFormGroup>
@@ -76,6 +90,8 @@ const state = reactive({
   enableAutoLoadNextPage: true,
   enableComment: true,
   enableRegister: true,
+  enableTurnstile: false,
+  turnstileSiteKey: "",
   maxCommentLength: 120,
   memoMaxHeight: 300,
   commentOrder: 'desc',

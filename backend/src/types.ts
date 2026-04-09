@@ -4,6 +4,7 @@ export interface Env {
   BUCKET: R2Bucket;
   JWT_SECRET: string;
   CORS_ORIGIN: string;
+  TURNSTILE_SECRET_KEY?: string;
 }
 
 // Database Models
@@ -144,6 +145,7 @@ export interface AddCommentReq {
   username?: string;
   email?: string;
   website?: string;
+  turnstileToken?: string;
 }
 
 export interface ImgConfig {

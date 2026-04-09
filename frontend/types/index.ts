@@ -43,6 +43,17 @@ export type CommentVO = {
 
 export type Comment = CommentVO;
 
+export type AddCommentDTO = {
+  memoId: number;
+  content: string;
+  replyTo?: string;
+  replyEmail?: string;
+  username?: string;
+  website?: string;
+  email?: string;
+  turnstileToken?: string;
+};
+
 // Memo types
 export type ImgConfig = {
   url: string;
@@ -89,6 +100,8 @@ export type SysConfigVO = {
   enableRegister: boolean;
   enableGoogleRecaptcha: boolean;
   googleSiteKey: string;
+  enableTurnstile: boolean;
+  turnstileSiteKey: string;
   enableComment: boolean;
   maxCommentLength: number;
   memoMaxHeight: number;

@@ -99,6 +99,19 @@ JWT_SECRET = "your-secret-key-change-this"  # 改成你的密钥
 CORS_ORIGIN = "*" # 根据需要设置前端地址,也可保持通配符
 ```
 
+如果要启用评论 Turnstile 校验，再配置 Worker Secret：
+
+```bash
+cd backend
+wrangler secret put TURNSTILE_SECRET_KEY
+```
+
+本地开发可写入 `backend/.dev.vars`：
+
+```bash
+TURNSTILE_SECRET_KEY=你的-turnstile-secret-key
+```
+
 #### 5. 安装依赖并部署
 
 ```bash
@@ -125,7 +138,15 @@ echo "NUXT_PUBLIC_API_BASE=https://moments-backend.your-subdomain.workers.dev" >
 pnpm install
 ```
 
-#### 3. 本地开发测试
+#### 3. 配置评论 Turnstile
+
+部署后台管理后，进入系统设置：
+
+1. 打开“是否启用 Turnstile 评论验证”
+2. 填入 Cloudflare Turnstile 的 Site Key
+3. 确认后端已经配置 `TURNSTILE_SECRET_KEY`
+
+#### 4. 本地开发测试
 
 ```bash
 pnpm run dev
@@ -133,7 +154,7 @@ pnpm run dev
 
 访问 `http://localhost:3000` 测试
 
-#### 4. 部署到 Cloudflare Pages
+#### 5. 部署到 Cloudflare Pages
 
 **方式一：使用 Wrangler（推荐）**
 
@@ -187,6 +208,8 @@ wrangler pages deploy .output/public --project-name=moments-frontend
 #### 评论相关
 - `POST /api/comment/add` - 添加评论
 - `POST /api/comment/remove?id=123` - 删除评论
+
+启用 Turnstile 后，匿名评论必须先通过验证；已登录用户默认跳过校验。
 
 #### 文件相关
 - `POST /api/file/upload` - 上传文件
@@ -269,6 +292,7 @@ Cloudflare 提供慷慨的免费额度：
 - 在线视频解析
 - Markdown 支持
 - 评论邮件通知
+- 匿名评论 Turnstile 防刷
 
 ### 🚧 计划中
 
@@ -295,6 +319,12 @@ CORS_ORIGIN = "https://your-frontend.pages.dev"
 ### 前端 API 请求失败
 
 检查 `.env` 文件中的 `NUXT_PUBLIC_API_BASE` 是否指向正确的后端地址。
+
+### 开启 Turnstile 后评论失败
+
+1. 确认系统设置里已开启 Turnstile，并填写正确的 Site Key
+2. 确认后端已设置 `TURNSTILE_SECRET_KEY`
+3. 确认 Turnstile 域名白名单包含当前站点域名
 
 ## 贡献
 

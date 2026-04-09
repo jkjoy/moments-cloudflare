@@ -1,34 +1,5 @@
 import { Env } from '../types';
-
-// Helper function to get config value from database
-async function getConfigValue(env: Env, name: string, defaultValue: any): Promise<any> {
-  const result = await env.DB.prepare(
-    'SELECT value FROM SysConfig WHERE name = ?'
-  ).bind(name).first<{ value: string }>();
-
-  if (!result?.value) {
-    return defaultValue;
-  }
-
-  // Try to parse JSON, otherwise return as string
-  try {
-    return JSON.parse(result.value);
-  } catch {
-    return result.value;
-  }
-}
-
-// Helper function to set config value in database
-async function setConfigValue(env: Env, name: string, value: any): Promise<void> {
-  const now = new Date().toISOString();
-  const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
-
-  // Use INSERT OR REPLACE to update or insert
-  await env.DB.prepare(
-    `INSERT OR REPLACE INTO SysConfig (name, value, createdAt, updatedAt)
-     VALUES (?, ?, COALESCE((SELECT createdAt FROM SysConfig WHERE name = ?), ?), ?)`
-  ).bind(name, valueStr, name, now, now).run();
-}
+import { getConfigValue, setConfigValue } from '../utils/sysConfig';
 
 export async function getSysConfig(request: Request, env: Env) {
   // Return public system configuration
@@ -47,6 +18,8 @@ export async function getSysConfig(request: Request, env: Env) {
     enableRegister: await getConfigValue(env, 'enableRegister', true),
     enableGoogleRecaptcha: await getConfigValue(env, 'enableGoogleRecaptcha', false),
     googleSiteKey: await getConfigValue(env, 'googleSiteKey', ''),
+    enableTurnstile: await getConfigValue(env, 'enableTurnstile', false),
+    turnstileSiteKey: await getConfigValue(env, 'turnstileSiteKey', ''),
     enableComment: await getConfigValue(env, 'enableComment', true),
     maxCommentLength: await getConfigValue(env, 'maxCommentLength', 500),
     memoMaxHeight: await getConfigValue(env, 'memoMaxHeight', 0),
@@ -79,6 +52,8 @@ export async function getFullSysConfig(request: Request, env: Env) {
     enableAutoLoadNextPage: await getConfigValue(env, 'enableAutoLoadNextPage', true),
     enableComment: await getConfigValue(env, 'enableComment', true),
     enableRegister: await getConfigValue(env, 'enableRegister', true),
+    enableTurnstile: await getConfigValue(env, 'enableTurnstile', false),
+    turnstileSiteKey: await getConfigValue(env, 'turnstileSiteKey', ''),
     maxCommentLength: await getConfigValue(env, 'maxCommentLength', 500),
     memoMaxHeight: await getConfigValue(env, 'memoMaxHeight', 0),
     commentOrder: await getConfigValue(env, 'commentOrder', 'desc'),
@@ -96,12 +71,13 @@ export async function getFullSysConfig(request: Request, env: Env) {
 
 export async function saveSysConfig(request: Request, env: Env) {
   try {
-    const body = await request.json();
+    const body = await request.json() as Record<string, unknown>;
 
     // Save each config value to database
     const configKeys = [
       'adminUserName', 'title', 'favicon', 'css', 'js',
       'enableAutoLoadNextPage', 'enableComment', 'enableRegister',
+      'enableTurnstile', 'turnstileSiteKey',
       'maxCommentLength', 'memoMaxHeight', 'commentOrder', 'timeFormat',
       'enableEmail', 'resendApiKey', 'emailFrom'
     ];

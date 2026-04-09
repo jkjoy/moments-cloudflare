@@ -93,7 +93,7 @@ export async function listMemos(request: Request, env: Env, ctx: AppContext): Pr
 
       list.push({
         ...memo,
-        user,
+        user: user || undefined,
         comments: comments.results || [],
         imgConfigs,
       });
@@ -277,7 +277,7 @@ export async function getMemo(request: Request, env: Env, ctx: AppContext, id: s
 
     return successResp({
       ...memo,
-      user,
+      user: user || undefined,
       comments: comments.results || [],
       imgConfigs,
     });

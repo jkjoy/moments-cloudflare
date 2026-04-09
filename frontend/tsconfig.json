@@ -10,8 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "types": ["@nuxt/types"]
+    "verbatimModuleSyntax": true
   },
   "extends": "./.nuxt/tsconfig.json"
 }

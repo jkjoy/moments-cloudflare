@@ -246,9 +246,14 @@ POST /api/comment/add
   "replyTo": "原评论者",  // 可选
   "username": "访客名",  // 可选
   "email": "email@example.com",  // 可选
-  "website": "https://example.com"  // 可选
+  "website": "https://example.com",  // 可选
+  "turnstileToken": "0.xxxxxx"  // 开启 Turnstile 时匿名评论必填
 }
 ```
+
+说明：
+- 启用 Turnstile 后，匿名评论必须带 `turnstileToken`
+- 已登录用户默认不强制校验 Turnstile
 
 ### 删除评论
 

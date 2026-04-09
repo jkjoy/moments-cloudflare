@@ -23,7 +23,7 @@ app.use('/*', cors({
 
 // Handle all OPTIONS requests
 app.options('/*', (c) => {
-  return c.text('', 204);
+  return c.body(null, 204);
 });
 
 // Auth middleware

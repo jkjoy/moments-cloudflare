@@ -13,20 +13,22 @@ export async function uploadFile(request: Request, env: Env, ctx: AppContext): P
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
 
-    if (!file) {
+    if (!file || typeof file === 'string') {
       return failResp(ErrorCodes.PARAM_ERROR, '没有上传文件');
     }
 
+    const uploadFile = file as unknown as File;
+
     // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
+    if (uploadFile.size > MAX_FILE_SIZE) {
       return failResp(ErrorCodes.PARAM_ERROR, `文件大小超过限制 (${MAX_FILE_SIZE / 1024 / 1024}MB)`);
     }
 
     // Validate file type
-    const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
-    const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
+    const isImage = ALLOWED_IMAGE_TYPES.includes(uploadFile.type);
+    const isVideo = ALLOWED_VIDEO_TYPES.includes(uploadFile.type);
 
     if (!isImage && !isVideo) {
       return failResp(ErrorCodes.PARAM_ERROR, '不支持的文件类型，仅支持图片和视频');
@@ -34,17 +36,17 @@ export async function uploadFile(request: Request, env: Env, ctx: AppContext): P
 
     // Generate filename with timestamp + original extension
     const timestamp = Date.now();
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const ext = uploadFile.name.split('.').pop()?.toLowerCase() || '';
     const filename = `${timestamp}.${ext}`;
 
     // Upload directly to Cloudflare R2
-    await env.BUCKET.put(filename, file.stream(), {
+    await env.BUCKET.put(filename, uploadFile.stream(), {
       httpMetadata: {
-        contentType: file.type,
+        contentType: uploadFile.type,
       },
       customMetadata: {
         userId: ctx.user.id.toString(),
-        originalName: file.name,
+        originalName: uploadFile.name,
         uploadedAt: new Date().toISOString(),
       },
     });

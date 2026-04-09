@@ -1,13 +1,34 @@
 import { Env, AddCommentReq, Comment, AppContext, ErrorCodes, Memo, User } from '../types';
 import { successResp, failResp } from '../utils/response';
 import { sendCommentNotification } from '../utils/email';
+import { getConfigValue } from '../utils/sysConfig';
+import { verifyTurnstileToken } from '../utils/turnstile';
 
 export async function addComment(request: Request, env: Env, ctx?: AppContext): Promise<Response> {
   try {
     const body = await request.json() as AddCommentReq;
 
-    if (!body.memoId || !body.content) {
+    if (!body.memoId || !body.content?.trim()) {
       return failResp(ErrorCodes.PARAM_ERROR);
+    }
+
+    const enableTurnstile = await getConfigValue(env, 'enableTurnstile', false);
+
+    if (enableTurnstile && !ctx?.user) {
+      if (!body.turnstileToken) {
+        return failResp(ErrorCodes.FAIL, '请先完成人机验证');
+      }
+
+      const verification = await verifyTurnstileToken(request, env, body.turnstileToken);
+      if (!verification.ok) {
+        console.warn('Turnstile verification failed:', verification.errors);
+
+        if (verification.errors?.includes('missing-input-secret')) {
+          return failResp(ErrorCodes.FAIL, 'Turnstile 未配置完成');
+        }
+
+        return failResp(ErrorCodes.FAIL, '人机验证失败，请重试');
+      }
     }
 
     const now = new Date().toISOString();
@@ -26,7 +47,7 @@ export async function addComment(request: Request, env: Env, ctx?: AppContext): 
         content, replyTo, username, email, website, memoId, author, createdAt, updatedAt
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
-      body.content,
+      body.content.trim(),
       body.replyTo || null,
       username,
       body.email || null,
