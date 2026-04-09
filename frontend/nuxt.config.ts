@@ -24,12 +24,6 @@ export default defineNuxtConfig({
             },
         },
     },
-    tailwindcss: {
-        safelist: [
-            'grid-cols-1',
-            'grid-cols-3',
-        ]
-    },
     vue: {
         compilerOptions: {
             isCustomElement: (tag:string) => ['meting-js'].includes(tag),

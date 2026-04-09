@@ -8,14 +8,14 @@ export class ApiClient {
     this.baseURL = baseURL;
 
     // Load token from localStorage
-    if (process.client) {
+    if (import.meta.client) {
       this.token = localStorage.getItem('token');
     }
   }
 
   setToken(token: string | null) {
     this.token = token;
-    if (process.client) {
+    if (import.meta.client) {
       if (token) {
         localStorage.setItem('token', token);
       } else {

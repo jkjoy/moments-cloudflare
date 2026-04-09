@@ -89,7 +89,10 @@
 
           <music-preview
             v-if="extJSON.music && extJSON.music.id"
-            v-bind="extJSON.music"
+            :id="extJSON.music.id"
+            :api="extJSON.music.api"
+            :server="extJSON.music.server"
+            :type="extJSON.music.type"
           />
           <douban-book-preview
             v-if="extJSON.doubanBook && extJSON.doubanBook.title"
@@ -158,7 +161,7 @@
               >
                 <UIcon
                   name="i-carbon-favorite"
-                  :class="[liked ? 'text-red-400' : '']"
+                  :class="liked ? 'text-red-400' : ''"
                 />
                 <div>赞</div>
               </div>

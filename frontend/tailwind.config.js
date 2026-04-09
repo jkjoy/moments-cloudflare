@@ -8,6 +8,10 @@ module.exports = {
     "./app.vue",
     "./error.vue",
   ],
+  safelist: [
+    'grid-cols-1',
+    'grid-cols-3',
+  ],
   theme: {
     extend: {
       colors: {

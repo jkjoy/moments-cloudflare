@@ -119,6 +119,10 @@ import type { Friend, UserVO } from "~/types";
 import { toast } from "vue-sonner";
 import { useGlobalState } from "~/store";
 
+type FriendListResponse = {
+  list: Friend[];
+};
+
 const DEFAULT_FRIEND = {
   name: "",
   icon: "",
@@ -163,20 +167,20 @@ const addFriend = async () => {
   }
 
   try {
-    const response = await useMyFetch("/friend/add", friend.value);
+    await useMyFetch("/friend/add", friend.value);
     toast.success("友情链接添加成功");
     await getFriendList();
     showAddModal.value = false;
     friend.value = { ...DEFAULT_FRIEND };
   } catch (error) {
-    toast.error(`${message}` || "添加友情链接失败");
+    toast.error(error instanceof Error ? error.message : "添加友情链接失败");
   }
 };
 
 const getFriendList = async () => {
   try {
-    const response = await useMyFetch("/friend/list");
-    friendList.value = response.list as Friend[];
+    const response = await useMyFetch<FriendListResponse>("/friend/list");
+    friendList.value = response.list;
   } catch (error) {
     friendList.value = [];
   }
@@ -207,7 +211,7 @@ const deleteFriend = async (id: number) => {
     await getFriendList();
     showDeleteModal.value = false;
   } catch (error) {
-    toast.error(`${message}` || "删除友情链接失败");
+    toast.error(error instanceof Error ? error.message : "删除友情链接失败");
   }
 };
 
