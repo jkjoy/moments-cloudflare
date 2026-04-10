@@ -1,6 +1,6 @@
 import { resolve } from "pathe";
 
-const nitroPrerenderCacheBase = resolve(process.cwd(), ".nuxt/cache/nitro/prerender");
+const nitroPrerenderCacheBase = resolve(".nuxt/cache/nitro/prerender");
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
