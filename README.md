@@ -199,6 +199,31 @@ Secrets:
 
 Variables:
 
+`CLOUDFLARE_API_TOKEN` 建议权限：
+
+- 最省事的做法：先按 Cloudflare 官方文档创建 `Edit Cloudflare Workers` 模板 Token，再手动额外添加 `Account -> Cloudflare Pages -> Edit`
+- 如果你使用自定义 Token，当前仓库这两条工作流建议至少包含以下权限：
+  - `Account -> Account Settings -> Read`
+  - `Account -> Workers Scripts -> Write`
+  - `Account -> Workers R2 Storage -> Write`
+  - `Account -> Cloudflare Pages -> Edit`
+  - `User -> User Details -> Read`
+  - `User -> Memberships -> Read`
+- 资源范围建议只授权当前项目所在的 Cloudflare Account，不要直接放开全部账号
+
+按需再加的权限：
+
+- `Account -> D1 -> Write`：只有你打算在 CI 里执行 `wrangler d1 create`、`wrangler d1 execute --remote`、导入/迁移数据库时才需要；本仓库当前内置工作流不执行这些命令
+- `Zone -> Workers Routes -> Write`：只有你把 Worker 绑定到自定义域名或 Route，而不只是使用 `*.workers.dev` 时才需要
+- `Account -> Workers KV Storage -> Write`：本项目当前未使用 KV，不需要
+
+可参考 Cloudflare 官方文档：
+
+- [Workers GitHub Actions](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)
+- [API token templates](https://developers.cloudflare.com/fundamentals/api/reference/template/)
+- [Pages direct upload with CI](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/)
+- [API token permissions](https://developers.cloudflare.com/fundamentals/api/reference/permissions/)
+
 说明：
 
 - 后端工作流会在 `backend/` 下执行 `npm ci`、`npx tsc --noEmit`、`npx wrangler deploy`

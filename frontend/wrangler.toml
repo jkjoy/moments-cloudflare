@@ -1,5 +1,5 @@
 name = "moments-cloudflare"
-pages_build_output_dir = "./frontend/.output/public"
+pages_build_output_dir = "./.output/public"
 compatibility_date = "2024-04-03"
 
 [[services]]
