@@ -150,7 +150,13 @@
       </NuxtLink>
     </div>
 
-    <img class="header-img w-full" :src="props.user.coverUrl" alt="" />
+    <div class="header-img h-[220px] w-full overflow-hidden">
+      <img
+        class="h-full w-full object-cover object-center"
+        :src="props.user.coverUrl"
+        alt=""
+      />
+    </div>
     <div class="absolute right-2 bottom-[-40px]">
       <div class="userinfo flex flex-col">
         <div class="flex flex-row items-center gap-4 justify-end">

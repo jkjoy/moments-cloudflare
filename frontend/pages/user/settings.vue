@@ -12,7 +12,13 @@
       <UInput type="file" size="sm" icon="i-heroicons-folder" @change="uploadCoverUrl"/>
       <div class="text-gray-500 text-sm my-2">或者输入在线地址</div>
       <UInput v-model="state.coverUrl" class="mb-2"/>
-      <img :src="state.coverUrl" class="w-full rounded object-cover" alt="" />
+      <div class="h-[220px] w-full overflow-hidden rounded">
+        <img
+          :src="state.coverUrl"
+          class="h-full w-full object-cover object-center"
+          alt=""
+        />
+      </div>
     </UFormGroup>
     <UFormGroup label="登录名" name="username" :ui="{label:{base:'font-bold'}}">
       <UInput v-model="state.username" disabled />
