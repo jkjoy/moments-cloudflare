@@ -26,6 +26,10 @@ export async function login(request: Request, env: Env): Promise<Response> {
       return failResp(ErrorCodes.FAIL, '用户不存在或密码不正确');
     }
 
+    if (!env.JWT_SECRET) {
+      return failResp(ErrorCodes.FAIL, 'JWT_SECRET 未配置');
+    }
+
     // Generate token
     const token = await generateToken(
       { id: result.id!, username: result.username! },
