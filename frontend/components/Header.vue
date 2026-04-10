@@ -150,7 +150,7 @@
       </NuxtLink>
     </div>
 
-    <div class="header-img h-[220px] w-full overflow-hidden">
+    <div class="header-img h-[300px] w-full overflow-hidden">
       <img
         class="h-full w-full object-cover object-center"
         :src="props.user.coverUrl"

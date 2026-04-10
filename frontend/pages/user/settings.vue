@@ -12,7 +12,7 @@
       <UInput type="file" size="sm" icon="i-heroicons-folder" @change="uploadCoverUrl"/>
       <div class="text-gray-500 text-sm my-2">或者输入在线地址</div>
       <UInput v-model="state.coverUrl" class="mb-2"/>
-      <div class="h-[220px] w-full overflow-hidden rounded">
+      <div class="h-[300px] w-full overflow-hidden rounded">
         <img
           :src="state.coverUrl"
           class="h-full w-full object-cover object-center"

@@ -82,14 +82,21 @@ export const ensureMarkdownHighlighter = async (content: string) => {
 
   if (!highlighterPromise) {
     highlighterPromise = (async () => {
-      const [{ fromHighlighter }, { createHighlighterCore }] = await Promise.all([
+      const [
+        { fromHighlighter },
+        { createHighlighterCore },
+        { createOnigurumaEngine },
+        { default: onigWasmUrl },
+      ] = await Promise.all([
         import("@shikijs/markdown-it/core"),
         import("shiki/core"),
+        import("shiki/engine/oniguruma"),
+        import("shiki/onig.wasm?url"),
       ]);
 
       highlighter = await createHighlighterCore({
         themes: [import("shiki/themes/github-dark.mjs")],
-        loadWasm: import("shiki/wasm"),
+        engine: createOnigurumaEngine(() => fetch(onigWasmUrl)),
       });
 
       md.use(fromHighlighter(highlighter, {

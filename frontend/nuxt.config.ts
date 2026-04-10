@@ -1,3 +1,7 @@
+import { resolve } from "pathe";
+
+const nitroPrerenderCacheBase = resolve(process.cwd(), ".nuxt/cache/nitro/prerender");
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
@@ -6,6 +10,13 @@ export default defineNuxtConfig({
     ssr: false,
     nitro: {
         preset: 'static',
+        storage: {
+            // Use a direct fs driver to avoid the Windows file URL warning from @nuxt/nitro-server.
+            "internal:nuxt:prerender": {
+                driver: "unstorage/drivers/fs-lite",
+                base: nitroPrerenderCacheBase,
+            },
+        },
     },
     dayjs: {
         locales: ['zh'],
@@ -97,10 +108,15 @@ export default defineNuxtConfig({
 
                         if (
                             id.includes('/@shikijs/engine-javascript/')
-                            || id.includes('/@shikijs/engine-oniguruma/')
+                        ) {
+                            return 'shiki-engine-js';
+                        }
+
+                        if (
+                            id.includes('/@shikijs/engine-oniguruma/')
                             || id.includes('/shiki/wasm')
                         ) {
-                            return 'shiki-engine';
+                            return 'shiki-engine-onig';
                         }
 
                         if (
@@ -112,6 +128,22 @@ export default defineNuxtConfig({
 
                         if (id.includes('/@fancyapps/ui/')) {
                             return 'media-viewer';
+                        }
+
+                        if (id.includes('/oniguruma-to-es/')) {
+                            return 'shiki-oniguruma-to-es';
+                        }
+
+                        if (id.includes('/regex-recursion/')) {
+                            return 'shiki-regex-recursion';
+                        }
+
+                        if (id.includes('/regex-utilities/')) {
+                            return 'shiki-regex-utilities';
+                        }
+
+                        if (id.includes('/regex/')) {
+                            return 'shiki-regex';
                         }
 
                         if (id.includes('/v-calendar/')) {
