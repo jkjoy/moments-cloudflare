@@ -1,6 +1,6 @@
 import { AppContext, Env, ErrorCodes } from '../types';
 import { failResp } from '../utils/response';
-import { getConfigValue, setConfigValue } from '../utils/sysConfig';
+import { getConfigValueFromMap, getConfigValues, setConfigValue } from '../utils/sysConfig';
 
 function requireAdmin(ctx: AppContext): Response | null {
   if (!ctx.user) {
@@ -16,34 +16,35 @@ function requireAdmin(ctx: AppContext): Response | null {
 
 export async function getSysConfig(request: Request, env: Env) {
   // Return public system configuration
+  const configValues = await getConfigValues(env);
   const config = {
     version: '1.0.0',
     commitId: '',
-    adminUserName: await getConfigValue(env, 'adminUserName', 'admin'),
-    title: await getConfigValue(env, 'title', '极简朋友圈'),
-    favicon: await getConfigValue(env, 'favicon', '/favicon.png'),
-    beiAnNo: await getConfigValue(env, 'beiAnNo', ''),
-    css: await getConfigValue(env, 'css', ''),
-    js: await getConfigValue(env, 'js', ''),
-    rss: await getConfigValue(env, 'rss', '/rss'),
-    enableAutoLoadNextPage: await getConfigValue(env, 'enableAutoLoadNextPage', true),
-    enableS3: await getConfigValue(env, 'enableS3', false),
-    enableRegister: await getConfigValue(env, 'enableRegister', true),
-    enableGoogleRecaptcha: await getConfigValue(env, 'enableGoogleRecaptcha', false),
-    googleSiteKey: await getConfigValue(env, 'googleSiteKey', ''),
-    enableTurnstile: await getConfigValue(env, 'enableTurnstile', false),
-    turnstileSiteKey: await getConfigValue(env, 'turnstileSiteKey', ''),
-    enableComment: await getConfigValue(env, 'enableComment', true),
-    maxCommentLength: await getConfigValue(env, 'maxCommentLength', 500),
-    memoMaxHeight: await getConfigValue(env, 'memoMaxHeight', 0),
-    commentOrder: await getConfigValue(env, 'commentOrder', 'desc'),
-    timeFormat: await getConfigValue(env, 'timeFormat', 'timeAgo'),
+    adminUserName: getConfigValueFromMap(configValues, 'adminUserName', 'admin'),
+    title: getConfigValueFromMap(configValues, 'title', '极简朋友圈'),
+    favicon: getConfigValueFromMap(configValues, 'favicon', '/favicon.png'),
+    beiAnNo: getConfigValueFromMap(configValues, 'beiAnNo', ''),
+    css: getConfigValueFromMap(configValues, 'css', ''),
+    js: getConfigValueFromMap(configValues, 'js', ''),
+    rss: getConfigValueFromMap(configValues, 'rss', '/rss'),
+    enableAutoLoadNextPage: getConfigValueFromMap(configValues, 'enableAutoLoadNextPage', true),
+    enableS3: getConfigValueFromMap(configValues, 'enableS3', false),
+    enableRegister: getConfigValueFromMap(configValues, 'enableRegister', true),
+    enableGoogleRecaptcha: getConfigValueFromMap(configValues, 'enableGoogleRecaptcha', false),
+    googleSiteKey: getConfigValueFromMap(configValues, 'googleSiteKey', ''),
+    enableTurnstile: getConfigValueFromMap(configValues, 'enableTurnstile', false),
+    turnstileSiteKey: getConfigValueFromMap(configValues, 'turnstileSiteKey', ''),
+    enableComment: getConfigValueFromMap(configValues, 'enableComment', true),
+    maxCommentLength: getConfigValueFromMap(configValues, 'maxCommentLength', 500),
+    memoMaxHeight: getConfigValueFromMap(configValues, 'memoMaxHeight', 0),
+    commentOrder: getConfigValueFromMap(configValues, 'commentOrder', 'desc'),
+    timeFormat: getConfigValueFromMap(configValues, 'timeFormat', 'timeAgo'),
     s3: {
       thumbnailSuffix: ''
     },
     // Only expose whether the Tencent LBS feature is on; never leak the key itself.
-    enableTencentLbs: !!(await getConfigValue<string>(env, 'tencentLbsKey', '')),
-    enableEmail: await getConfigValue(env, 'enableEmail', false),
+    enableTencentLbs: !!getConfigValueFromMap(configValues, 'tencentLbsKey', ''),
+    enableEmail: getConfigValueFromMap(configValues, 'enableEmail', false),
     resendApiKey: '',
     emailFrom: ''
   };
@@ -61,27 +62,28 @@ export async function getFullSysConfig(request: Request, env: Env, ctx: AppConte
   }
 
   // Return full system configuration including sensitive data
+  const configValues = await getConfigValues(env);
   const config = {
     version: '1.0.0',
     commitId: '',
-    adminUserName: await getConfigValue(env, 'adminUserName', 'admin'),
-    title: await getConfigValue(env, 'title', '极简朋友圈'),
-    favicon: await getConfigValue(env, 'favicon', '/favicon.png'),
-    css: await getConfigValue(env, 'css', ''),
-    js: await getConfigValue(env, 'js', ''),
-    enableAutoLoadNextPage: await getConfigValue(env, 'enableAutoLoadNextPage', true),
-    enableComment: await getConfigValue(env, 'enableComment', true),
-    enableRegister: await getConfigValue(env, 'enableRegister', true),
-    enableTurnstile: await getConfigValue(env, 'enableTurnstile', false),
-    turnstileSiteKey: await getConfigValue(env, 'turnstileSiteKey', ''),
-    maxCommentLength: await getConfigValue(env, 'maxCommentLength', 500),
-    memoMaxHeight: await getConfigValue(env, 'memoMaxHeight', 0),
-    commentOrder: await getConfigValue(env, 'commentOrder', 'desc'),
-    timeFormat: await getConfigValue(env, 'timeFormat', 'timeAgo'),
-    enableEmail: await getConfigValue(env, 'enableEmail', false),
-    resendApiKey: await getConfigValue(env, 'resendApiKey', ''),
-    emailFrom: await getConfigValue(env, 'emailFrom', ''),
-    tencentLbsKey: await getConfigValue(env, 'tencentLbsKey', '')
+    adminUserName: getConfigValueFromMap(configValues, 'adminUserName', 'admin'),
+    title: getConfigValueFromMap(configValues, 'title', '极简朋友圈'),
+    favicon: getConfigValueFromMap(configValues, 'favicon', '/favicon.png'),
+    css: getConfigValueFromMap(configValues, 'css', ''),
+    js: getConfigValueFromMap(configValues, 'js', ''),
+    enableAutoLoadNextPage: getConfigValueFromMap(configValues, 'enableAutoLoadNextPage', true),
+    enableComment: getConfigValueFromMap(configValues, 'enableComment', true),
+    enableRegister: getConfigValueFromMap(configValues, 'enableRegister', true),
+    enableTurnstile: getConfigValueFromMap(configValues, 'enableTurnstile', false),
+    turnstileSiteKey: getConfigValueFromMap(configValues, 'turnstileSiteKey', ''),
+    maxCommentLength: getConfigValueFromMap(configValues, 'maxCommentLength', 500),
+    memoMaxHeight: getConfigValueFromMap(configValues, 'memoMaxHeight', 0),
+    commentOrder: getConfigValueFromMap(configValues, 'commentOrder', 'desc'),
+    timeFormat: getConfigValueFromMap(configValues, 'timeFormat', 'timeAgo'),
+    enableEmail: getConfigValueFromMap(configValues, 'enableEmail', false),
+    resendApiKey: getConfigValueFromMap(configValues, 'resendApiKey', ''),
+    emailFrom: getConfigValueFromMap(configValues, 'emailFrom', ''),
+    tencentLbsKey: getConfigValueFromMap(configValues, 'tencentLbsKey', '')
   };
 
   return Response.json({

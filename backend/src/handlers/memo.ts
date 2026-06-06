@@ -1,6 +1,11 @@
 import { Env, Memo, Comment, User, SaveMemoReq, ListMemoReq, AppContext, ErrorCodes } from '../types';
 import { successResp, failResp } from '../utils/response';
 
+type MemoUserRow = Pick<User, 'id' | 'username' | 'nickname' | 'slogan' | 'avatarUrl' | 'coverUrl'>;
+type CommentRow = Comment & { rn: number };
+
+const buildPlaceholders = (count: number) => Array.from({ length: count }, () => '?').join(', ');
+
 export async function listMemos(request: Request, env: Env, ctx: AppContext): Promise<Response> {
   try {
     const body = await request.json() as ListMemoReq;
@@ -65,6 +70,8 @@ export async function listMemos(request: Request, env: Env, ctx: AppContext): Pr
       `SELECT * FROM Memo ${whereClause} ORDER BY pinned DESC, datetime(createdAt) DESC LIMIT ? OFFSET ?`
     ).bind(...params, size, offset).all<Memo>();
 
+    const memoList = memos.results || [];
+
     // Get total count
     const totalResult = await env.DB.prepare(
       `SELECT COUNT(*) as total FROM Memo ${whereClause}`
@@ -72,32 +79,51 @@ export async function listMemos(request: Request, env: Env, ctx: AppContext): Pr
 
     const total = totalResult?.total || 0;
 
-    // Fetch user info and comments for each memo
-    const list: Memo[] = [];
-    for (const memo of memos.results || []) {
-      const user = await env.DB.prepare(
-        'SELECT username, nickname, slogan, id, avatarUrl, coverUrl FROM User WHERE id = ?'
-      ).bind(memo.userId).first<User>();
+    const userIds = [...new Set(memoList.map((memo) => memo.userId))];
+    const userMap = new Map<number, MemoUserRow>();
+    if (userIds.length > 0) {
+      const userRows = await env.DB.prepare(
+        `SELECT id, username, nickname, slogan, avatarUrl, coverUrl FROM User WHERE id IN (${buildPlaceholders(userIds.length)})`
+      ).bind(...userIds).all<MemoUserRow>();
 
-      const comments = await env.DB.prepare(
-        'SELECT * FROM Comment WHERE memoId = ? ORDER BY createdAt DESC LIMIT 5'
-      ).bind(memo.id).all<Comment>();
-
-      // Generate imgConfigs from imgs string
-      const imgConfigs = memo.imgs
-        ? memo.imgs.split(',').filter(Boolean).map(img => ({
-            url: img,
-            thumbUrl: img, // For now, use same URL for thumbnail
-          }))
-        : [];
-
-      list.push({
-        ...memo,
-        user: user || undefined,
-        comments: comments.results || [],
-        imgConfigs,
-      });
+      for (const user of userRows.results || []) {
+        userMap.set(user.id, user);
+      }
     }
+
+    const memoIds = memoList.map((memo) => memo.id);
+    const commentMap = new Map<number, Comment[]>();
+    if (memoIds.length > 0) {
+      const commentRows = await env.DB.prepare(
+        `WITH ranked_comments AS (
+          SELECT
+            *,
+            ROW_NUMBER() OVER (PARTITION BY memoId ORDER BY datetime(createdAt) DESC, id DESC) AS rn
+          FROM Comment
+          WHERE memoId IN (${buildPlaceholders(memoIds.length)})
+        )
+        SELECT * FROM ranked_comments WHERE rn <= 5 ORDER BY memoId ASC, rn ASC`
+      ).bind(...memoIds).all<CommentRow>();
+
+      for (const commentRow of commentRows.results || []) {
+        const { rn: _rn, ...comment } = commentRow;
+        const memoComments = commentMap.get(comment.memoId) || [];
+        memoComments.push(comment);
+        commentMap.set(comment.memoId, memoComments);
+      }
+    }
+
+    const list: Memo[] = memoList.map((memo) => ({
+      ...memo,
+      user: userMap.get(memo.userId),
+      comments: commentMap.get(memo.id) || [],
+      imgConfigs: memo.imgs
+        ? memo.imgs.split(',').filter(Boolean).map(img => ({
+          url: img,
+          thumbUrl: img, // For now, use same URL for thumbnail
+        }))
+        : [],
+    }));
 
     return successResp({
       list,

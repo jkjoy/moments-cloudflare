@@ -77,8 +77,10 @@ const global = useGlobalState();
 const open = useState<boolean>("sidebarOpen", () => false);
 const currentUser = useState<UserVO>("userinfo");
 const sysConfig = useState<SysConfigVO>("sysConfig");
-const currentProfile = await useMyFetch<UserVO>("/user/profile");
-const sysConfigVO = await useMyFetch<SysConfigVO>("/sysConfig/get");
+const [currentProfile, sysConfigVO] = await Promise.all([
+  useMyFetch<UserVO>("/user/profile"),
+  useMyFetch<SysConfigVO>("/sysConfig/get"),
+]);
 if (currentProfile) {
   currentUser.value = currentProfile;
   sysConfig.value = {
