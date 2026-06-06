@@ -10,6 +10,7 @@ import * as friendHandler from './handlers/friend';
 import * as sysConfigHandler from './handlers/sysConfig';
 import * as tagHandler from './handlers/tag';
 import * as doubanHandler from './handlers/douban';
+import * as locationHandler from './handlers/location';
 
 const app = new Hono<{ Bindings: Env; Variables: { user?: User } }>();
 
@@ -125,6 +126,11 @@ app.post('/api/memo/getDoubanBookInfo', async (c) => {
 app.post('/api/memo/getDoubanMovieInfo', async (c) => {
   const id = c.req.query('id') || '';
   return doubanHandler.getDoubanMovieInfo(c.req.raw, c.env, id);
+});
+
+app.post('/api/memo/reverseGeocode', async (c) => {
+  const ctx: AppContext = { user: c.get('user') };
+  return locationHandler.reverseGeocode(c.req.raw, c.env, ctx);
 });
 
 // Comment routes

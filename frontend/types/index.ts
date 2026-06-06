@@ -113,6 +113,9 @@ export type SysConfigVO = {
   enableEmail: boolean;
   resendApiKey: string;
   emailFrom: string;
+  // 腾讯位置服务：enableTencentLbs 在公开配置中标识功能是否开启；tencentLbsKey 仅在管理员完整配置中返回。
+  enableTencentLbs: boolean;
+  tencentLbsKey: string;
 };
 
 // Music types

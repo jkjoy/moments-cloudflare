@@ -41,6 +41,8 @@ export async function getSysConfig(request: Request, env: Env) {
     s3: {
       thumbnailSuffix: ''
     },
+    // Only expose whether the Tencent LBS feature is on; never leak the key itself.
+    enableTencentLbs: !!(await getConfigValue<string>(env, 'tencentLbsKey', '')),
     enableEmail: await getConfigValue(env, 'enableEmail', false),
     resendApiKey: '',
     emailFrom: ''
@@ -78,7 +80,8 @@ export async function getFullSysConfig(request: Request, env: Env, ctx: AppConte
     timeFormat: await getConfigValue(env, 'timeFormat', 'timeAgo'),
     enableEmail: await getConfigValue(env, 'enableEmail', false),
     resendApiKey: await getConfigValue(env, 'resendApiKey', ''),
-    emailFrom: await getConfigValue(env, 'emailFrom', '')
+    emailFrom: await getConfigValue(env, 'emailFrom', ''),
+    tencentLbsKey: await getConfigValue(env, 'tencentLbsKey', '')
   };
 
   return Response.json({
@@ -102,7 +105,8 @@ export async function saveSysConfig(request: Request, env: Env, ctx: AppContext)
       'enableAutoLoadNextPage', 'enableComment', 'enableRegister',
       'enableTurnstile', 'turnstileSiteKey',
       'maxCommentLength', 'memoMaxHeight', 'commentOrder', 'timeFormat',
-      'enableEmail', 'resendApiKey', 'emailFrom'
+      'enableEmail', 'resendApiKey', 'emailFrom',
+      'tencentLbsKey'
     ];
 
     for (const key of configKeys) {

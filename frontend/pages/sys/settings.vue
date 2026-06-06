@@ -73,7 +73,14 @@
         <UInput v-model="state.emailFrom" placeholder="noreply@yourdomain.com"/>
       </UFormGroup>
       </template>
-    
+
+    <UFormGroup label="腾讯位置服务 Key" name="tencentLbsKey" :ui="{label:{base:'font-bold'}}">
+      <UInput v-model="state.tencentLbsKey" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" type="password" autocomplete="off"/>
+      <div class="text-xs text-gray-400 mt-1">
+        在 <a href="https://lbs.qq.com/" target="_blank" class="underline">腾讯位置服务控制台</a> 申请 WebServiceAPI Key，填写后发布动态时可一键 GPS 定位获取地址；留空则不显示定位按钮。
+      </div>
+    </UFormGroup>
+
     <UButton class="justify-center" @click="save">保存</UButton>
   </div>
 </template>
@@ -116,6 +123,7 @@ const state = reactive({
   enableEmail: false,
   resendApiKey: "",
   emailFrom: "",
+  tencentLbsKey: "",
 })
 
 const reload = async () => {

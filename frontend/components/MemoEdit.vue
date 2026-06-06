@@ -59,9 +59,9 @@
     </div>
 
     <div class="flex justify-between items-center">
-      <div class="flex flex-row gap-1 items-center text-[#576b95] text-sm cursor-pointer">
+      <div class="flex flex-row gap-2 items-center text-[#576b95] text-sm">
         <UPopover :popper="{ arrow: true }" mode="click">
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1 cursor-pointer">
             <UIcon name="i-carbon-location"/>
             <span>{{ state.location ? locationLabel : '自定义位置' }}</span>
           </div>
@@ -74,6 +74,13 @@
             </div>
           </template>
         </UPopover>
+        <UIcon
+          v-if="sysConfig?.enableTencentLbs"
+          :name="locating ? 'i-carbon-circle-dash' : 'i-carbon-location-current'"
+          :class="`w-5 h-5 cursor-pointer hover:text-[#9fc84a] ${locating ? 'animate-spin' : ''}`"
+          :title="locating ? '定位中...' : '获取当前位置(GPS)'"
+          @click="locateByGps"
+        />
       </div>
 
       <div class="flex gap-1 text-gray-500 items-center">
@@ -107,6 +114,7 @@ import type {
   MetingMusicServer,
   MetingMusicType,
   MusicDTO,
+  SysConfigVO,
   Video,
   VideoType
 } from "~/types";
@@ -176,6 +184,51 @@ const reset = () => {
 const locationLabel = computed(() => {
   return state.location.split(" ").join(" · ")
 })
+
+// 腾讯位置服务 GPS 定位：仅在管理员配置了 Key(enableTencentLbs) 时显示按钮。
+// 结果写入 state.location，与自定义位置共用同一字段，可继续手动编辑。
+const sysConfig = useState<SysConfigVO>("sysConfig")
+const locating = ref(false)
+
+const locateByGps = () => {
+  if (locating.value) {
+    return
+  }
+  if (!import.meta.client || !navigator.geolocation) {
+    toast.error("当前浏览器不支持定位")
+    return
+  }
+  locating.value = true
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const res = await useMyFetch<{ location: string }>("/memo/reverseGeocode", {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        })
+        if (res?.location) {
+          state.location = res.location
+          toast.success("已获取当前位置")
+        } else {
+          toast.error("未能解析当前位置")
+        }
+      } catch (e: any) {
+        toast.error(e?.message || "获取位置失败")
+      } finally {
+        locating.value = false
+      }
+    },
+    (err) => {
+      locating.value = false
+      toast.error(
+        err.code === err.PERMISSION_DENIED
+          ? "定位权限被拒绝，请在浏览器中允许定位"
+          : "定位失败，请重试"
+      )
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  )
+}
 
 const handleDragImage = (imgs: string[]) => {
   state.imgs = imgs.filter(Boolean).join(",")
