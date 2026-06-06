@@ -14,12 +14,20 @@ function requireAdmin(ctx: AppContext): Response | null {
   return null;
 }
 
+function getReleaseMeta(env: Env, configValues: Record<string, unknown>) {
+  return {
+    version: env.APP_VERSION || getConfigValueFromMap(configValues, 'version', '1.0.0'),
+    commitId: env.APP_COMMIT_ID || getConfigValueFromMap(configValues, 'commitId', ''),
+  };
+}
+
 export async function getSysConfig(request: Request, env: Env) {
   // Return public system configuration
   const configValues = await getConfigValues(env);
+  const releaseMeta = getReleaseMeta(env, configValues);
   const config = {
-    version: '1.0.0',
-    commitId: '',
+    version: releaseMeta.version,
+    commitId: releaseMeta.commitId,
     adminUserName: getConfigValueFromMap(configValues, 'adminUserName', 'admin'),
     title: getConfigValueFromMap(configValues, 'title', '极简朋友圈'),
     favicon: getConfigValueFromMap(configValues, 'favicon', '/favicon.png'),
@@ -63,9 +71,10 @@ export async function getFullSysConfig(request: Request, env: Env, ctx: AppConte
 
   // Return full system configuration including sensitive data
   const configValues = await getConfigValues(env);
+  const releaseMeta = getReleaseMeta(env, configValues);
   const config = {
-    version: '1.0.0',
-    commitId: '',
+    version: releaseMeta.version,
+    commitId: releaseMeta.commitId,
     adminUserName: getConfigValueFromMap(configValues, 'adminUserName', 'admin'),
     title: getConfigValueFromMap(configValues, 'title', '极简朋友圈'),
     favicon: getConfigValueFromMap(configValues, 'favicon', '/favicon.png'),

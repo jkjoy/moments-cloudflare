@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,8 +42,16 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Prepare release metadata
+        id: release
+        run: |
+          VERSION="$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || node -p "require('./package.json').version")"
+          COMMIT_ID="$(git rev-parse --short HEAD)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "commit_id=${COMMIT_ID}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy Worker
-        run: npx wrangler deploy
+        run: npx wrangler deploy --var "APP_VERSION:${{ steps.release.outputs.version }}" --var "APP_COMMIT_ID:${{ steps.release.outputs.commit_id }}"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -5,6 +5,8 @@ export interface Env {
   JWT_SECRET: string;
   CORS_ORIGIN: string;
   TURNSTILE_SECRET_KEY?: string;
+  APP_VERSION?: string;
+  APP_COMMIT_ID?: string;
 }
 
 // Database Models
