@@ -1,6 +1,7 @@
 import { AppContext, Env, ErrorCodes } from '../types';
 import { failResp } from '../utils/response';
 import { getConfigValueFromMap, getConfigValues, setConfigValue } from '../utils/sysConfig';
+import { CACHE_KEYS, CACHE_TTL_SECONDS, getCachedJson, invalidateConfigCache, setCachedJson } from '../utils/cache';
 
 function requireAdmin(ctx: AppContext): Response | null {
   if (!ctx.user) {
@@ -22,6 +23,14 @@ function getReleaseMeta(env: Env, configValues: Record<string, unknown>) {
 }
 
 export async function getSysConfig(request: Request, env: Env) {
+  const cached = await getCachedJson(env, CACHE_KEYS.sysConfigPublic);
+  if (cached) {
+    return Response.json({
+      code: 0,
+      data: cached
+    });
+  }
+
   // Return public system configuration
   const configValues = await getConfigValues(env);
   const releaseMeta = getReleaseMeta(env, configValues);
@@ -56,6 +65,8 @@ export async function getSysConfig(request: Request, env: Env) {
     resendApiKey: '',
     emailFrom: ''
   };
+
+  await setCachedJson(env, CACHE_KEYS.sysConfigPublic, config, CACHE_TTL_SECONDS.long);
 
   return Response.json({
     code: 0,
@@ -125,6 +136,8 @@ export async function saveSysConfig(request: Request, env: Env, ctx: AppContext)
         await setConfigValue(env, key, body[key]);
       }
     }
+
+    await invalidateConfigCache(env);
 
     return Response.json({
       code: 0,

@@ -1,5 +1,6 @@
 import { Env, Memo, Comment, User, SaveMemoReq, ListMemoReq, AppContext, ErrorCodes } from '../types';
 import { successResp, failResp } from '../utils/response';
+import { CACHE_PREFIXES, CACHE_TTL_SECONDS, buildCacheKey, getCachedJson, invalidateMemoCache, setCachedJson } from '../utils/cache';
 
 type MemoUserRow = Pick<User, 'id' | 'username' | 'nickname' | 'slogan' | 'avatarUrl' | 'coverUrl'>;
 type CommentRow = Comment & { rn: number };
@@ -9,6 +10,14 @@ const buildPlaceholders = (count: number) => Array.from({ length: count }, () =>
 export async function listMemos(request: Request, env: Env, ctx: AppContext): Promise<Response> {
   try {
     const body = await request.json() as ListMemoReq;
+    const cacheKey = await buildCacheKey(`${CACHE_PREFIXES.memo}list`, {
+      body,
+      userId: ctx.user?.id || null,
+    });
+    const cached = await getCachedJson(env, cacheKey);
+    if (cached) {
+      return successResp(cached);
+    }
 
     const page = body.page || 1;
     const size = body.size || 10;
@@ -125,11 +134,15 @@ export async function listMemos(request: Request, env: Env, ctx: AppContext): Pr
         : [],
     }));
 
-    return successResp({
+    const data = {
       list,
       total,
       hasNext: page * size < total,
-    });
+    };
+
+    await setCachedJson(env, cacheKey, data, CACHE_TTL_SECONDS.short);
+
+    return successResp(data);
   } catch (error) {
     console.error('List memos error:', error);
     return failResp(ErrorCodes.FAIL);
@@ -212,6 +225,8 @@ export async function saveMemo(request: Request, env: Env, ctx: AppContext): Pro
       ).run();
     }
 
+    await invalidateMemoCache(env);
+
     return successResp({});
   } catch (error) {
     console.error('Save memo error:', error);
@@ -256,6 +271,8 @@ export async function removeMemo(request: Request, env: Env, ctx: AppContext, id
       }
     }
 
+    await invalidateMemoCache(env);
+
     return successResp({});
   } catch (error) {
     console.error('Remove memo error:', error);
@@ -268,6 +285,12 @@ export async function getMemo(request: Request, env: Env, ctx: AppContext, id: s
     const memoId = parseInt(id);
     if (isNaN(memoId)) {
       return failResp(ErrorCodes.PARAM_ERROR);
+    }
+
+    const cacheKey = `${CACHE_PREFIXES.memo}get:${memoId}:user:${ctx.user?.id || 'anon'}`;
+    const cached = await getCachedJson(env, cacheKey);
+    if (cached) {
+      return successResp(cached);
     }
 
     const memo = await env.DB.prepare(
@@ -301,12 +324,16 @@ export async function getMemo(request: Request, env: Env, ctx: AppContext, id: s
         }))
       : [];
 
-    return successResp({
+    const data = {
       ...memo,
       user: user || undefined,
       comments: comments.results || [],
       imgConfigs,
-    });
+    };
+
+    await setCachedJson(env, cacheKey, data, CACHE_TTL_SECONDS.short);
+
+    return successResp(data);
   } catch (error) {
     console.error('Get memo error:', error);
     return failResp(ErrorCodes.FAIL);
@@ -323,6 +350,8 @@ export async function likeMemo(request: Request, env: Env, id: string): Promise<
     await env.DB.prepare(
       'UPDATE Memo SET favCount = favCount + 1 WHERE id = ?'
     ).bind(memoId).run();
+
+    await invalidateMemoCache(env);
 
     return successResp({});
   } catch (error) {
@@ -358,6 +387,8 @@ export async function setPinned(request: Request, env: Env, ctx: AppContext, id:
     await env.DB.prepare(
       'UPDATE Memo SET pinned = ? WHERE id = ?'
     ).bind(newPinned, memoId).run();
+
+    await invalidateMemoCache(env);
 
     return successResp({});
   } catch (error) {

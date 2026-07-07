@@ -2,6 +2,7 @@ import { Env, LoginReq, RegReq, ProfileReq, User, ErrorCodes, AppContext } from 
 import { successResp, failResp } from '../utils/response';
 import { hashPassword, comparePassword } from '../utils/bcrypt';
 import { generateToken } from '../utils/jwt';
+import { CACHE_PREFIXES, CACHE_TTL_SECONDS, getCachedJson, invalidateUserCache, setCachedJson } from '../utils/cache';
 
 export async function login(request: Request, env: Env): Promise<Response> {
   try {
@@ -91,6 +92,8 @@ export async function register(request: Request, env: Env): Promise<Response> {
       now
     ).run();
 
+    await invalidateUserCache(env);
+
     return successResp({});
   } catch (error) {
     console.error('Register error:', error);
@@ -105,6 +108,11 @@ export async function getProfile(request: Request, env: Env, ctx: AppContext): P
     if (ctx.user) {
       user = ctx.user;
     } else {
+      const cached = await getCachedJson<User>(env, `${CACHE_PREFIXES.user}profile:default`);
+      if (cached) {
+        return successResp(cached);
+      }
+
       // Get first user (admin)
       user = await env.DB.prepare(
         'SELECT username, nickname, slogan, id, avatarUrl, coverUrl, email FROM User ORDER BY id LIMIT 1'
@@ -113,6 +121,10 @@ export async function getProfile(request: Request, env: Env, ctx: AppContext): P
 
     if (!user) {
       return failResp(ErrorCodes.FAIL, '用户不存在');
+    }
+
+    if (!ctx.user) {
+      await setCachedJson(env, `${CACHE_PREFIXES.user}profile:default`, user, CACHE_TTL_SECONDS.long);
     }
 
     return successResp(user);
@@ -124,6 +136,12 @@ export async function getProfile(request: Request, env: Env, ctx: AppContext): P
 
 export async function getProfileByUsername(request: Request, env: Env, username: string): Promise<Response> {
   try {
+    const cacheKey = `${CACHE_PREFIXES.user}profile:username:${username}`;
+    const cached = await getCachedJson<User>(env, cacheKey);
+    if (cached) {
+      return successResp(cached);
+    }
+
     const user = await env.DB.prepare(
       'SELECT username, nickname, slogan, id, avatarUrl, coverUrl, email FROM User WHERE username = ?'
     ).bind(username).first<User>();
@@ -131,6 +149,8 @@ export async function getProfileByUsername(request: Request, env: Env, username:
     if (!user) {
       return failResp(ErrorCodes.FAIL, '用户不存在');
     }
+
+    await setCachedJson(env, cacheKey, user, CACHE_TTL_SECONDS.long);
 
     return successResp(user);
   } catch (error) {
@@ -185,6 +205,8 @@ export async function saveProfile(request: Request, env: Env, ctx: AppContext): 
     await env.DB.prepare(
       `UPDATE User SET ${updates.join(', ')} WHERE id = ?`
     ).bind(...values).run();
+
+    await invalidateUserCache(env);
 
     return successResp({});
   } catch (error) {

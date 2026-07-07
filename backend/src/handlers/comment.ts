@@ -3,6 +3,7 @@ import { successResp, failResp } from '../utils/response';
 import { sendCommentNotification } from '../utils/email';
 import { getConfigValue } from '../utils/sysConfig';
 import { verifyTurnstileToken } from '../utils/turnstile';
+import { invalidateMemoCache } from '../utils/cache';
 
 export async function addComment(request: Request, env: Env, ctx?: AppContext): Promise<Response> {
   try {
@@ -62,6 +63,8 @@ export async function addComment(request: Request, env: Env, ctx?: AppContext): 
     await env.DB.prepare(
       'UPDATE Memo SET commentCount = commentCount + 1 WHERE id = ?'
     ).bind(body.memoId).run();
+
+    await invalidateMemoCache(env);
 
     // Send email notification (don't wait for it, run in background)
     try {
@@ -145,6 +148,8 @@ export async function removeComment(request: Request, env: Env, ctx: AppContext,
     await env.DB.prepare(
       'UPDATE Memo SET commentCount = commentCount - 1 WHERE id = ?'
     ).bind(comment.memoId).run();
+
+    await invalidateMemoCache(env);
 
     return successResp({});
   } catch (error) {

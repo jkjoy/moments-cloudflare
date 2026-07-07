@@ -1,6 +1,7 @@
 // Environment bindings
 export interface Env {
   DB: D1Database;
+  CACHE?: KVNamespace;
   BUCKET: R2Bucket;
   JWT_SECRET: string;
   CORS_ORIGIN: string;

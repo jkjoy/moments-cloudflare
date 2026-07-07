@@ -11,6 +11,7 @@ import * as sysConfigHandler from './handlers/sysConfig';
 import * as tagHandler from './handlers/tag';
 import * as doubanHandler from './handlers/douban';
 import * as locationHandler from './handlers/location';
+import { CACHE_PREFIXES, CACHE_TTL_SECONDS, getCachedJson, setCachedJson } from './utils/cache';
 
 const app = new Hono<{ Bindings: Env; Variables: { user?: User } }>();
 
@@ -35,9 +36,18 @@ app.use('/api/*', async (c, next) => {
     try {
       const payload = await verifyToken(token, c.env.JWT_SECRET);
       if (payload) {
-        const user = await c.env.DB.prepare(
-          'SELECT * FROM User WHERE id = ?'
-        ).bind(payload.userId).first<User>();
+        const cacheKey = `${CACHE_PREFIXES.user}auth:${payload.userId}`;
+        let user = await getCachedJson<User>(c.env, cacheKey);
+
+        if (!user) {
+          user = await c.env.DB.prepare(
+            'SELECT * FROM User WHERE id = ?'
+          ).bind(payload.userId).first<User>();
+
+          if (user) {
+            await setCachedJson(c.env, cacheKey, user, CACHE_TTL_SECONDS.medium);
+          }
+        }
 
         if (user) {
           c.set('user', user);
