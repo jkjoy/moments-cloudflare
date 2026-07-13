@@ -1,0 +1,26 @@
+name = "moments-cloudflare"
+main = "worker/index.ts"
+compatibility_date = "2024-04-03"
+
+[assets]
+directory = "./.output/public"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/r2/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "moments-db"
+database_id = "34d9f779-a4df-4e61-9598-8dd82375f578"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "moments-storage"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "d0dfb1af2f4747f695b2ceb9d744333e"
+
+[vars]
+APP_VERSION = "2.0.0"
+# 留空时由 Worker 代理 R2。
+#R2_DOMAIN = "cdn.example.com"

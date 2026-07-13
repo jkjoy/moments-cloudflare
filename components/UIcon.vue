@@ -1,5 +1,5 @@
 <template>
-  <IconWrapper :name="name" :class="class" />
+  <IconWrapper :name="name" />
 </template>
 
 <script setup>
@@ -7,10 +7,6 @@ defineProps({
   name: {
     type: String,
     required: true
-  },
-  class: {
-    type: String,
-    default: ''
   }
 })
 </script>

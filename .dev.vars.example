@@ -1,0 +1,2 @@
+# Copy to .dev.vars for local development and replace this value.
+JWT_SECRET="replace-with-a-long-random-local-secret"

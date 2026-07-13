@@ -203,7 +203,7 @@ app.post('/api/tag/list', async (c) => {
 });
 
 // Health check
-app.get('/', (c) => {
+app.get('/api/health', (c) => {
   return c.json({ message: 'Moments API is running', version: c.env.APP_VERSION || '1.0.0' });
 });
 

@@ -42,17 +42,11 @@ const doParse = async (close: Function) => {
   }
 }
 const type = defineModel<'book' | 'movie'>('type')
-const data = defineModel<DoubanBook | DoubanMovie>('data', {
-  default: {
-    id: ""
-  }
-})
+const data = defineModel<DoubanBook | DoubanMovie>('data', { required: true })
 
 const reset = (close: Function) => {
   type.value = 'book'
-  data.value = {
-    id: ""
-  }
+  data.value = { id: "" } as DoubanBook | DoubanMovie
   close()
 }
 </script>

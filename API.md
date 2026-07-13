@@ -2,8 +2,8 @@
 
 ## 基础信息
 
-- 站内访问 Base URL: 当前前端域名下的 `/api`
-- Pages Functions 会通过 Service Binding `BACKEND` 转发到后端 Worker `moments-backend`
+- 站内访问 Base URL: 当前应用域名下的 `/api`
+- Nuxt 静态资源与 Hono API 由同一个 Cloudflare Worker 提供
 - Content-Type: `application/json`
 - 认证方式: Header `X-API-TOKEN`
 

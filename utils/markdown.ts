@@ -99,7 +99,7 @@ export const ensureMarkdownHighlighter = async (content: string) => {
         engine: createOnigurumaEngine(() => fetch(onigWasmUrl)),
       });
 
-      md.use(fromHighlighter(highlighter, {
+      md.use(fromHighlighter(highlighter as Parameters<typeof fromHighlighter>[0], {
         themes: {
           light: "github-dark",
           dark: "github-dark",

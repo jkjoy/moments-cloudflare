@@ -1,5 +1,6 @@
 import { Env, AppContext, ErrorCodes } from '../types';
 import { successResp, failResp } from '../utils/response';
+import { buildR2PublicUrl, getR2Domain } from '../utils/r2';
 
 // 允许的文件类型
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -65,6 +66,11 @@ export async function uploadFile(request: Request, env: Env, ctx: AppContext): P
 
 export async function getFile(request: Request, env: Env, key: string): Promise<Response> {
   try {
+    const r2Domain = getR2Domain(env);
+    if (r2Domain) {
+      return Response.redirect(buildR2PublicUrl(r2Domain, key), 302);
+    }
+
     const object = await env.BUCKET.get(key);
 
     if (!object) {

@@ -1,28 +1,20 @@
-name: Deploy Backend
+name: Deploy
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "backend/**"
-      - ".github/workflows/deploy-backend.yml"
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: deploy-backend-${{ github.ref }}
+  group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,23 +26,25 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
 
       - name: Prepare release metadata
         id: release
+        shell: bash
         run: |
           VERSION="$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || node -p "require('./package.json').version")"
-          COMMIT_ID="$(git rev-parse --short HEAD)"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "commit_id=${COMMIT_ID}" >> "$GITHUB_OUTPUT"
+          echo "commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy Worker
+      - name: Deploy application
         run: npx wrangler deploy --var "APP_VERSION:${{ steps.release.outputs.version }}" --var "APP_COMMIT_ID:${{ steps.release.outputs.commit_id }}"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -52,30 +52,6 @@ export default defineNuxtConfig({
         }
     },
     vite: {
-        server: {
-            proxy: {
-                "/api": {
-                    target: "http://localhost:8787",
-                    // changeOrigin: true,
-                },
-                "/r2": {
-                    target: "http://localhost:8787",
-                    // changeOrigin: true,
-                },
-                "/upload": {
-                    target: "http://localhost:8787",
-                    // changeOrigin: true,
-                },
-                "/rss": {
-                    target: "http://localhost:8787",
-                    // changeOrigin: true,
-                },
-                "/swagger": {
-                    target: "http://localhost:8787",
-                    // changeOrigin: true,
-                },
-            },
-        },
         build: {
             rollupOptions: {
                 output: {

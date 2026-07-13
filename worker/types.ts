@@ -8,6 +8,7 @@ export interface Env {
   TURNSTILE_SECRET_KEY?: string;
   APP_VERSION?: string;
   APP_COMMIT_ID?: string;
+  R2_DOMAIN?: string;
 }
 
 // Database Models

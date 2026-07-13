@@ -1,5 +1,11 @@
-backend/init-db.js
-backend/test-db.js
-backend/wrangler.toml.dev
-/frontend/dist
+node_modules
+.nuxt
+.output
+.wrangler
+.env
+.dev.vars
+wrangler.toml.dev
+/dist
+/frontend/
+/backend/
 /.claude

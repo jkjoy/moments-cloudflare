@@ -13,11 +13,11 @@ export const useMyFetch = async <T>(url: string, data?: any) => {
     headers["x-api-token"] = userinfo.token;
   }
 
-  const res = await $fetch<ResultVO<T>>(`${API_BASE}/api${url}`, {
+  const res = await $fetch(`${API_BASE}/api${url}`, {
     method: "post",
     body: data ? JSON.stringify(data) : null,
     headers: headers,
-  });
+  }) as ResultVO<T>;
 
   if (!res || res.code !== 0) {
     if (!res) {
