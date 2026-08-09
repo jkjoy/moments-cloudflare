@@ -64,7 +64,7 @@ npx wrangler r2 bucket create moments-storage
 npx wrangler kv namespace create CACHE
 ```
 
-初始化数据库：
+使用本地命令首次部署时，手动初始化数据库：
 
 ```bash
 npm run db:init:remote
@@ -90,12 +90,12 @@ npx wrangler secret put RESEND_API_KEY
 npm run deploy
 ```
 
-GitHub Actions 使用 [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)，一次完成安装、前后端类型检查、Nuxt 构建和 Worker 部署。仓库需要配置：
+GitHub Actions 使用 [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)，一次完成安装、前后端类型检查、Nuxt 构建和 Worker 部署。流程会检查远程 D1 的完整表结构，仅在数据库尚未初始化时执行 `schema.sql`；后续部署会自动跳过初始化。仓库需要配置：
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
-API Token 至少需要 Workers Scripts、D1、R2、KV 的读取及部署所需权限。
+API Token 至少需要 Workers Scripts、D1（包含首次初始化所需的编辑权限）、R2、KV 的读取及部署所需权限。
 
 ## API
 

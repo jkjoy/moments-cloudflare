@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -43,6 +43,36 @@ jobs:
           VERSION="$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || node -p "require('./package.json').version")"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Check database initialization
+        id: database
+        shell: bash
+        run: |
+          RESULT="$(npx wrangler d1 execute moments-db --remote --command "SELECT COUNT(*) AS table_count FROM sqlite_master WHERE type = 'table' AND name IN ('User', 'Memo', 'Comment', 'Friend', 'SysConfig')" --json --yes)"
+
+          if node -e '
+            const executions = JSON.parse(process.argv[1]);
+            const initialized = executions.some(({ results = [] }) =>
+              results.some(({ table_count }) => Number(table_count) === 5),
+            );
+            process.exit(initialized ? 0 : 1);
+          ' "$RESULT"; then
+            echo "initialized=true" >> "$GITHUB_OUTPUT"
+            echo "Remote D1 database is already initialized; skipping initialization."
+          else
+            echo "initialized=false" >> "$GITHUB_OUTPUT"
+            echo "Remote D1 database is empty and will be initialized."
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Initialize database
+        if: steps.database.outputs.initialized != 'true'
+        run: npm run db:init:remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy application
         run: npx wrangler deploy --var "APP_VERSION:${{ steps.release.outputs.version }}" --var "APP_COMMIT_ID:${{ steps.release.outputs.commit_id }}"

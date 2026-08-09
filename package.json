@@ -10,7 +10,7 @@
     "typecheck": "nuxi typecheck && tsc --noEmit -p worker/tsconfig.json",
     "db:create": "wrangler d1 create moments-db",
     "db:init": "wrangler d1 execute moments-db --local --file=./schema.sql",
-    "db:init:remote": "wrangler d1 execute moments-db --remote --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute moments-db --remote --file=./schema.sql --yes",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
